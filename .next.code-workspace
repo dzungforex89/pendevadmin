@@ -1,0 +1,26 @@
+{
+	"folders": [
+		{
+			"path": ".next"
+		},
+		{
+			"path": "app"
+		},
+		{
+			"path": "node_modules"
+		},
+		{
+			"path": "server"
+		},
+		{
+			"path": "components"
+		},
+		{
+			"path": "data"
+		},
+		{
+			"path": "styles"
+		}
+	],
+	"settings": {}
+}
