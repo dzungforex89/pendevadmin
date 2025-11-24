@@ -49,7 +49,7 @@ export default function PostPage() {
   if (!post) return <div>Post not found.</div>;
   return (
     <article className="prose">
-      <h1>{post.title}</h1>
+      <h1 className="text-4xl font-bold mb-2">{post.title}</h1>
       <p className="text-sm text-slate-500">{post.date}</p>
       <div dangerouslySetInnerHTML={{ __html: post.content }} />
     </article>

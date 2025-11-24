@@ -13,3 +13,33 @@ body {
 .container {
   @apply max-w-3xl mx-auto px-6;
 }
+
+/* Center images inside rendered post content. */
+/* If a paragraph contains images, center the images and make them inline so two can sit side-by-side. */
+.prose p:has(img) {
+  text-align: center;
+}
+.prose p:has(img) img {
+  display: inline-block;
+  max-width: 48%;
+  height: auto;
+  margin: 0.5rem 0.5rem;
+  vertical-align: middle;
+}
+/* Fallback for browsers without :has(): center single images, keep max-width 100% */
+.prose img {
+  display: block;
+  margin: 0.75rem auto;
+  max-width: 100%;
+  height: auto;
+}
+
+/* When images are wrapped in figure, center the figure */
+.prose figure {
+  display: block;
+  text-align: center;
+}
+.prose figure img {
+  display: inline-block;
+  max-width: 48%;
+}
