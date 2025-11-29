@@ -16,6 +16,7 @@ model Post {
   slug      String     @unique
   excerpt   String
   content   String
+  thumbnail String?
   fontSize  String     @default("16px")
   date      DateTime   @default(now())
   createdAt DateTime   @default(now())

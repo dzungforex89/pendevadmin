@@ -27,7 +27,9 @@ const handle = app.getRequestHandler();
 
 app.prepare().then(async () => {
   const server = express();
-  server.use(express.json());
+  // Tăng limit để có thể nhận base64 string lớn (ảnh thumbnail có thể lên đến vài MB)
+  server.use(express.json({ limit: '50mb' }));
+  server.use(express.urlencoded({ limit: '50mb', extended: true }));
 
   // List all posts
   server.get('/api/posts', async (req, res) => {
@@ -70,7 +72,7 @@ app.prepare().then(async () => {
       if (!dbConnected) {
         return res.status(503).json({ error: 'Database not connected' });
       }
-      const { title, slug, excerpt, content, fontSize } = req.body;
+      const { title, slug, excerpt, content, thumbnail, fontSize } = req.body;
       if (!title || !slug) return res.status(400).json({ error: 'title and slug required' });
       
       const post = await prisma.post.create({
@@ -79,6 +81,7 @@ app.prepare().then(async () => {
           slug,
           excerpt: excerpt || '',
           content: content || '',
+          thumbnail: thumbnail || null,
           fontSize: fontSize || '16px'
         }
       });

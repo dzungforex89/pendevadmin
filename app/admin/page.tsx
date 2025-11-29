@@ -1,7 +1,12 @@
 "use client";
 import React, { useEffect, useState, useRef } from 'react';
-import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import dynamic from 'next/dynamic';
+import StickyEditorToolbar from '../../components/StickyEditorToolbar';
+
+const ThumbnailEditor = dynamic(() => import('../../components/ThumbnailEditor'), {
+  ssr: false
+});
 
 type Post = {
   id: string;
@@ -9,6 +14,7 @@ type Post = {
   slug: string;
   excerpt: string;
   content: string;
+  thumbnail?: string | null;
   date: string;
 };
 
@@ -18,15 +24,22 @@ export default function AdminPage() {
   const [title, setTitle] = useState('');
   const [slug, setSlug] = useState('');
   const titleRef = useRef<HTMLDivElement | null>(null);
+  const excerptRef = useRef<HTMLDivElement | null>(null);
   const [excerpt, setExcerpt] = useState('');
+  const [thumbnail, setThumbnail] = useState('');
   const contentRef = useRef<HTMLDivElement | null>(null);
   const [fontSize, setFontSize] = useState('16px');
   const [saving, setSaving] = useState(false);
+  const [activeEditorRef, setActiveEditorRef] = useState<React.RefObject<HTMLDivElement>>(titleRef);
   
   // Edit state
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editingPost, setEditingPost] = useState<Post | null>(null);
+  const editTitleRef = useRef<HTMLDivElement | null>(null);
+  const editExcerptRef = useRef<HTMLDivElement | null>(null);
   const editContentRef = useRef<HTMLDivElement | null>(null);
+  const [editThumbnail, setEditThumbnail] = useState('');
+  const [editActiveEditorRef, setEditActiveEditorRef] = useState<React.RefObject<HTMLDivElement>>(editTitleRef);
 
   useEffect(() => {
     fetch('/api/posts')
@@ -37,8 +50,11 @@ export default function AdminPage() {
 
   // When editing modal opens, populate editor with original content
   useEffect(() => {
-    if (editingId && editingPost && editContentRef.current) {
-      editContentRef.current.innerHTML = editingPost.content;
+    if (editingId && editingPost) {
+      if (editTitleRef.current) editTitleRef.current.innerHTML = editingPost.title;
+      if (editExcerptRef.current) editExcerptRef.current.innerHTML = editingPost.excerpt;
+      if (editContentRef.current) editContentRef.current.innerHTML = editingPost.content;
+      setEditThumbnail(editingPost.thumbnail || '');
     }
   }, [editingId, editingPost]);
 
@@ -64,11 +80,10 @@ export default function AdminPage() {
       // Replace selected content with span
       range.deleteContents();
       range.insertNode(span);
-      // move caret after inserted node
+      // Giữ lại selection sau khi apply
       sel.removeAllRanges();
       const newRange = document.createRange();
-      newRange.setStartAfter(span);
-      newRange.collapse(true);
+      newRange.selectNodeContents(span);
       sel.addRange(newRange);
     } catch (e) {
       // fallback: try execCommand insertHTML
@@ -77,6 +92,17 @@ export default function AdminPage() {
         if (!sel) return;
         const html = `<span style="font-size:${size}">${sel.toString()}</span>`;
         document.execCommand('insertHTML', false, html);
+        // Giữ lại selection
+        if (sel.rangeCount > 0) {
+          const range = sel.getRangeAt(0);
+          const element = range.commonAncestorContainer.parentElement;
+          if (element && element.tagName === 'SPAN') {
+            const newRange = document.createRange();
+            newRange.selectNodeContents(element);
+            sel.removeAllRanges();
+            sel.addRange(newRange);
+          }
+        }
       } catch (err) {
         // noop
       }
@@ -86,12 +112,45 @@ export default function AdminPage() {
   function handleContentKeyDown(e: React.KeyboardEvent<HTMLDivElement>) {
     const isCtrlOrCmd = e.ctrlKey || e.metaKey;
     
-    if (isCtrlOrCmd && e.key === '+') {
+    if (isCtrlOrCmd && (e.key === '+' || e.key === '=')) {
       e.preventDefault();
       increaseFontSize();
+      // Giữ lại selection
+      setTimeout(() => {
+        const sel = window.getSelection();
+        if (sel && sel.rangeCount > 0) {
+          const range = sel.getRangeAt(0);
+          if (range.collapsed) {
+            // Nếu selection bị mất, thử restore từ element gần nhất
+            const element = range.commonAncestorContainer.parentElement;
+            if (element && element.tagName === 'SPAN') {
+              const newRange = document.createRange();
+              newRange.selectNodeContents(element);
+              sel.removeAllRanges();
+              sel.addRange(newRange);
+            }
+          }
+        }
+      }, 0);
     } else if (isCtrlOrCmd && e.key === '-') {
       e.preventDefault();
       decreaseFontSize();
+      // Giữ lại selection
+      setTimeout(() => {
+        const sel = window.getSelection();
+        if (sel && sel.rangeCount > 0) {
+          const range = sel.getRangeAt(0);
+          if (range.collapsed) {
+            const element = range.commonAncestorContainer.parentElement;
+            if (element && element.tagName === 'SPAN') {
+              const newRange = document.createRange();
+              newRange.selectNodeContents(element);
+              sel.removeAllRanges();
+              sel.addRange(newRange);
+            }
+          }
+        }
+      }, 0);
     } else if (isCtrlOrCmd && e.key.toLowerCase() === 'b') {
       e.preventDefault();
       document.execCommand('bold', false);
@@ -131,7 +190,8 @@ export default function AdminPage() {
     const content = contentRef.current?.innerHTML || '';
     const titleHtml = titleRef.current?.innerHTML || title;
     const titleText = titleRef.current?.innerText || title;
-    const payload = { title: titleHtml, slug: slug || makeSlug(titleText), excerpt, content };
+    const excerptHtml = excerptRef.current?.innerHTML || excerpt;
+    const payload = { title: titleHtml, slug: slug || makeSlug(titleText), excerpt: excerptHtml, content, thumbnail: thumbnail || null };
     try {
       const res = await fetch('/api/posts', {
         method: 'POST',
@@ -144,8 +204,10 @@ export default function AdminPage() {
       setTitle('');
       setSlug('');
       setExcerpt('');
+      setThumbnail('');
       if (contentRef.current) contentRef.current.innerHTML = '';
       if (titleRef.current) titleRef.current.innerHTML = '';
+      if (excerptRef.current) excerptRef.current.innerHTML = '';
     } catch (err) {
       // eslint-disable-next-line no-console
       console.error(err);
@@ -159,15 +221,36 @@ export default function AdminPage() {
     setEditingPost(post);
   }
 
-  async function handleUpdateContent() {
+  // Check for edit query parameter
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const editId = urlParams.get('edit');
+    if (editId) {
+      const postToEdit = posts.find(p => p.id === editId || p.slug === editId);
+      if (postToEdit) {
+        openEditModal(postToEdit);
+        // Remove query parameter from URL
+        window.history.replaceState({}, '', '/admin');
+      }
+    }
+  }, [posts]);
+
+  async function handleUpdatePost() {
     if (!editingId) return;
     setSaving(true);
-    const newContent = editContentRef.current?.innerHTML || '';
+    const titleHtml = editTitleRef.current?.innerHTML || '';
+    const excerptHtml = editExcerptRef.current?.innerHTML || '';
+    const contentHtml = editContentRef.current?.innerHTML || '';
     try {
       const res = await fetch(`/api/posts/${editingId}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ content: newContent })
+        body: JSON.stringify({ 
+          title: titleHtml,
+          excerpt: excerptHtml,
+          content: contentHtml,
+          thumbnail: editThumbnail || null
+        })
       });
       if (!res.ok) throw new Error('Failed to update');
       const updated = await res.json();
@@ -189,6 +272,12 @@ export default function AdminPage() {
 
   return (
     <section>
+      <StickyEditorToolbar
+        activeEditorRef={activeEditorRef}
+        titleRef={titleRef}
+        excerptRef={excerptRef}
+        contentRef={contentRef}
+      />
       <h1 className="text-2xl font-semibold mb-4">Dashboard</h1>
 
       <form onSubmit={handleSave} className="space-y-4 mb-6">
@@ -199,6 +288,7 @@ export default function AdminPage() {
             contentEditable
             onInput={() => setTitle(titleRef.current?.innerText || '')}
             onKeyDown={handleContentKeyDown}
+            onFocus={() => setActiveEditorRef(titleRef)}
             className="w-full border px-2 py-1 font-semibold text-2xl"
             data-placeholder="Post title"
           />
@@ -208,19 +298,33 @@ export default function AdminPage() {
           <input value={slug} onChange={(e) => setSlug(e.target.value)} className="w-full border px-2 py-1" />
         </div>
         <div>
-          <label className="block text-sm">Excerpt</label>
-          <input value={excerpt} onChange={(e) => setExcerpt(e.target.value)} className="w-full border px-2 py-1" />
+          <label className="block text-sm mb-2">Excerpt</label>
+          <div className="border rounded overflow-hidden">
+            <div
+              ref={excerptRef}
+              contentEditable
+              onInput={() => setExcerpt(excerptRef.current?.innerText || '')}
+              onFocus={() => setActiveEditorRef(excerptRef)}
+              className="w-full min-h-[80px] px-3 py-2 prose"
+              data-placeholder="Write excerpt here..."
+            />
+          </div>
         </div>
         <div>
-          <label className="block text-sm">Content</label>
-          <div className="mb-2 text-xs text-slate-500">Tips: Use Ctrl + "+" / Ctrl + "-" to adjust font size, Ctrl+ "B/I/U"</div>
-          <div
-            ref={contentRef}
-            contentEditable
-            onKeyDown={handleContentKeyDown}
-            className="w-full min-h-[150px] border px-3 py-2 prose"
-            data-placeholder="Write your post here..."
-          />
+          <ThumbnailEditor value={thumbnail} onChange={setThumbnail} />
+        </div>
+        <div>
+          <label className="block text-sm mb-2">Content</label>
+          <div className="border rounded overflow-hidden">
+            <div
+              ref={contentRef}
+              contentEditable
+              onKeyDown={handleContentKeyDown}
+              onFocus={() => setActiveEditorRef(contentRef)}
+              className="w-full min-h-[300px] px-3 py-2 prose"
+              data-placeholder="Write your post here..."
+            />
+          </div>
         </div>
         <div>
           <button type="submit" disabled={saving} className="px-4 py-2 bg-sky-600 text-white rounded">
@@ -235,7 +339,7 @@ export default function AdminPage() {
           {posts.map((p) => (
             <li key={p.id} className="flex items-center justify-between gap-4">
               <div className="flex-1">
-                <Link href={`/posts/${p.slug}`} onMouseEnter={() => prefetchPost(p.slug)} onClick={(e) => handleNavigate(e, p.slug)}>{p.title}</Link>
+                <span className="font-medium">{p.title}</span>
               </div>
               <button 
                 type="button" 
@@ -254,29 +358,50 @@ export default function AdminPage() {
 
       {/* Edit Modal */}
       {editingId && editingPost && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg shadow-lg w-full max-w-6xl max-h-[90vh] overflow-hidden flex flex-col p-6">
-            <h2 className="text-xl font-semibold mb-4">Edit Content</h2>
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 overflow-y-auto">
+          <div className="bg-white rounded-lg shadow-lg w-full max-w-6xl my-8 flex flex-col p-6">
+            <h2 className="text-xl font-semibold mb-4">Edit Post</h2>
             
-            <div className="flex gap-4 flex-1 overflow-hidden">
-              {/* Preview (Left) */}
-              <div className="flex-1 overflow-y-auto border-r pr-4">
-                <div className="text-sm font-semibold mb-2 text-slate-600">Original Content</div>
-                <div className="prose prose-sm max-w-none text-sm">
-                  <div dangerouslySetInnerHTML={{ __html: editingPost.content }} />
-                </div>
+            <StickyEditorToolbar
+              activeEditorRef={editActiveEditorRef}
+              titleRef={editTitleRef}
+              excerptRef={editExcerptRef}
+              contentRef={editContentRef}
+            />
+            
+            <div className="space-y-4 flex-1">
+              <div>
+                <label className="block text-sm mb-2">Title</label>
+                <div
+                  ref={editTitleRef}
+                  contentEditable
+                  onFocus={() => setEditActiveEditorRef(editTitleRef)}
+                  className="w-full border px-2 py-1 font-semibold text-2xl"
+                />
               </div>
-
-              {/* Editor (Right) */}
-              <div className="flex-1 flex flex-col overflow-hidden">
-                <label className="block text-sm font-semibold mb-2">Edit Content</label>
-                <div className="mb-2 text-xs text-slate-500">Ctrl++ / Ctrl+- for font size, Ctrl+B for bold</div>
+              
+              <div>
+                <label className="block text-sm mb-2">Excerpt</label>
+                <div
+                  ref={editExcerptRef}
+                  contentEditable
+                  onFocus={() => setEditActiveEditorRef(editExcerptRef)}
+                  className="w-full min-h-[80px] border px-3 py-2 prose"
+                />
+              </div>
+              
+              <div>
+                <ThumbnailEditor value={editThumbnail} onChange={setEditThumbnail} />
+              </div>
+              
+              <div>
+                <label className="block text-sm mb-2">Content</label>
                 <div
                   ref={editContentRef}
                   contentEditable
                   onKeyDown={handleContentKeyDown}
-                  className="flex-1 border px-3 py-2 prose overflow-y-auto"
-                  suppressContentEditableWarning
+                  onFocus={() => setEditActiveEditorRef(editContentRef)}
+                  className="w-full min-h-[300px] border px-3 py-2 prose"
                 />
               </div>
             </div>
@@ -291,7 +416,7 @@ export default function AdminPage() {
               </button>
               <button 
                 type="button" 
-                onClick={handleUpdateContent} 
+                onClick={handleUpdatePost} 
                 disabled={saving}
                 className="px-4 py-2 bg-sky-600 text-white rounded hover:bg-sky-700 disabled:bg-gray-400"
               >
@@ -305,15 +430,3 @@ export default function AdminPage() {
   );
 }
 
-function prefetchPost(slug: string) {
-  try {
-    if (typeof window === 'undefined') return;
-    // create cache object
-    (window as any).__POST_CACHE = (window as any).__POST_CACHE || {};
-    const cache = (window as any).__POST_CACHE;
-    if (cache[slug]) return; // already cached or fetching
-    cache[slug] = fetch(`/api/posts/${slug}`).then((r) => (r.ok ? r.json() : null)).then((d) => { cache[slug] = d; return d; }).catch(() => { cache[slug] = null; });
-  } catch (e) {
-    // noop
-  }
-}
