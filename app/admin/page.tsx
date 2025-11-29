@@ -1,6 +1,7 @@
 "use client";
 import React, { useEffect, useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import dynamic from 'next/dynamic';
 import StickyEditorToolbar from '../../components/StickyEditorToolbar';
 
@@ -339,11 +340,19 @@ export default function AdminPage() {
           {posts.map((p) => (
             <li key={p.id} className="flex items-center justify-between gap-4">
               <div className="flex-1">
-                <span className="font-medium">{p.title}</span>
+                <Link 
+                  href={`/posts/${p.slug}`}
+                  className="font-medium hover:text-blue-600 transition-colors"
+                >
+                  {p.title}
+                </Link>
               </div>
               <button 
                 type="button" 
-                onClick={() => openEditModal(p)} 
+                onClick={(e) => {
+                  e.preventDefault();
+                  openEditModal(p);
+                }} 
                 title="Edit"
                 className="p-2 text-blue-500 hover:text-blue-700 hover:bg-blue-50 rounded transition"
               >
