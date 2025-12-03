@@ -198,7 +198,7 @@ export default function ThumbnailEditor({ value, onChange }: ThumbnailEditorProp
 
   return (
     <div className="space-y-2">
-      <label className="block text-sm font-medium">Thumbnail</label>
+      <label className="block text-sm font-medium" style={{ color: 'oklch(0.22 0.04 260)' }}>Thumbnail</label>
       
       {!imgSrc ? (
         <div
@@ -207,8 +207,12 @@ export default function ThumbnailEditor({ value, onChange }: ThumbnailEditorProp
           onDrop={handleDrop}
           onPaste={handlePaste}
           className={`border-2 border-dashed rounded-lg p-8 text-center cursor-pointer transition-colors ${
-            isDragging ? 'border-blue-500 bg-blue-50' : 'border-gray-300 hover:border-gray-400'
+            isDragging ? 'bg-opacity-20' : 'hover:opacity-80'
           }`}
+          style={{
+            borderColor: isDragging ? 'oklch(0.5638 0.2255 24.24)' : 'oklch(0.3036 0.1223 288)',
+            backgroundColor: isDragging ? 'oklch(0.5638 0.2255 24.24)' : 'transparent'
+          }}
           onClick={() => fileInputRef.current?.click()}
         >
           <input
@@ -232,10 +236,10 @@ export default function ThumbnailEditor({ value, onChange }: ThumbnailEditorProp
                 strokeLinejoin="round"
               />
             </svg>
-            <p className="text-sm text-gray-600">
+            <p className="text-sm" style={{ color: 'oklch(0.22 0.04 260)' }}>
               Kéo thả ảnh vào đây hoặc click để chọn
             </p>
-            <p className="text-xs text-gray-500">
+            <p className="text-xs" style={{ color: 'oklch(0.4 0.04 260)' }}>
               Hoặc dán ảnh từ clipboard (Ctrl+V)
             </p>
           </div>
@@ -275,7 +279,10 @@ export default function ThumbnailEditor({ value, onChange }: ThumbnailEditorProp
               <button
                 type="button"
                 onClick={handleCropComplete}
-                className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 text-sm"
+                className="px-4 py-2 text-white rounded text-sm transition-colors"
+                style={{ backgroundColor: 'oklch(0.5638 0.2255 24.24)' }}
+                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'oklch(0.50 0.2255 24.24)'}
+                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'oklch(0.5638 0.2255 24.24)'}
               >
                 Apply
               </button>
@@ -283,7 +290,13 @@ export default function ThumbnailEditor({ value, onChange }: ThumbnailEditorProp
               <button
                 type="button"
                 onClick={handleEditCrop}
-                className="px-4 py-2 bg-gray-200 text-gray-700 rounded hover:bg-gray-300 text-sm"
+                className="px-4 py-2 rounded text-sm transition-colors"
+                style={{ 
+                  backgroundColor: 'oklch(0.3036 0.1223 288)',
+                  color: 'white'
+                }}
+                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'oklch(0.35 0.1223 288)'}
+                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'oklch(0.3036 0.1223 288)'}
               >
                 Edit Crop
               </button>
@@ -291,14 +304,23 @@ export default function ThumbnailEditor({ value, onChange }: ThumbnailEditorProp
             <button
               type="button"
               onClick={() => fileInputRef.current?.click()}
-              className="px-4 py-2 bg-gray-200 text-gray-700 rounded hover:bg-gray-300 text-sm"
+              className="px-4 py-2 rounded text-sm transition-colors"
+              style={{ 
+                backgroundColor: 'oklch(0.3036 0.1223 288)',
+                color: 'white'
+              }}
+              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'oklch(0.35 0.1223 288)'}
+              onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'oklch(0.3036 0.1223 288)'}
             >
               Chọn ảnh khác
             </button>
             <button
               type="button"
               onClick={handleRemove}
-              className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 text-sm"
+              className="px-4 py-2 text-white rounded text-sm transition-colors"
+              style={{ backgroundColor: 'oklch(0.5638 0.2255 24.24)' }}
+              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'oklch(0.50 0.2255 24.24)'}
+              onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'oklch(0.5638 0.2255 24.24)'}
             >
               Xóa
             </button>

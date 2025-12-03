@@ -2,6 +2,12 @@
 @tailwind components;
 @tailwind utilities;
 
+:root {
+  --secondary: oklch(0.3036 0.1223 288);
+  --primary: oklch(0.5638 0.2255 24.24);
+  --foreground: oklch(0.22 0.04 260);
+}
+
 html, body, #__next {
   height: 100%;
 }
@@ -42,4 +48,61 @@ body {
 .prose figure img {
   display: inline-block;
   max-width: 48%;
+}
+
+/* Auto color links blue */
+.prose a {
+  color: #2563eb !important;
+  text-decoration: underline;
+}
+
+.prose a:hover {
+  color: #1d4ed8 !important;
+}
+
+/* Table styles */
+.prose table {
+  border-collapse: collapse;
+  width: 100%;
+  margin: 1rem 0;
+}
+
+.prose table td,
+.prose table th {
+  border: 1px solid #ddd;
+  padding: 8px;
+  text-align: left;
+}
+
+.prose table th {
+  background-color: #f2f2f2;
+  font-weight: bold;
+}
+
+/* Header styles */
+.header-logo {
+  transition: opacity 0.2s;
+}
+
+.header-logo:hover {
+  opacity: 0.8;
+}
+
+.header-nav-link {
+  color: oklch(0.22 0.04 260);
+  transition: all 0.2s;
+}
+
+.header-nav-link:hover {
+  color: oklch(0.5638 0.2255 24.24);
+  background-color: oklch(0.95 0.01 260);
+}
+
+.header-admin-link {
+  color: oklch(0.5638 0.2255 24.24);
+  transition: opacity 0.2s;
+}
+
+.header-admin-link:hover {
+  opacity: 0.8;
 }

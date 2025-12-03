@@ -72,16 +72,18 @@ app.prepare().then(async () => {
       if (!dbConnected) {
         return res.status(503).json({ error: 'Database not connected' });
       }
-      const { title, slug, excerpt, content, thumbnail, fontSize } = req.body;
+      const { title, slug, topic, excerpt, content, thumbnail, pinned, fontSize } = req.body;
       if (!title || !slug) return res.status(400).json({ error: 'title and slug required' });
       
       const post = await prisma.post.create({
         data: {
           title,
           slug,
+          topic: topic ? parseInt(topic) : null,
           excerpt: excerpt || '',
           content: content || '',
           thumbnail: thumbnail || null,
+          pinned: pinned || false,
           fontSize: fontSize || '16px'
         }
       });
@@ -102,9 +104,19 @@ app.prepare().then(async () => {
       if (!dbConnected) {
         return res.status(503).json({ error: 'Database not connected' });
       }
+      const { title, topic, excerpt, content, thumbnail, pinned, fontSize } = req.body;
+      const updateData: any = {};
+      if (title !== undefined) updateData.title = title;
+      if (topic !== undefined) updateData.topic = topic ? parseInt(topic) : null;
+      if (excerpt !== undefined) updateData.excerpt = excerpt;
+      if (content !== undefined) updateData.content = content;
+      if (thumbnail !== undefined) updateData.thumbnail = thumbnail;
+      if (pinned !== undefined) updateData.pinned = pinned;
+      if (fontSize !== undefined) updateData.fontSize = fontSize;
+      
       const post = await prisma.post.update({
         where: { id: req.params.id },
-        data: req.body
+        data: updateData
       });
       res.json(post);
     } catch (err: any) {

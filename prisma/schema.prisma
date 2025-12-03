@@ -14,9 +14,11 @@ model Post {
   id        String     @id @default(cuid())
   title     String
   slug      String     @unique
+  topic     Int?
   excerpt   String
   content   String
   thumbnail String?
+  pinned    Boolean    @default(false)
   fontSize  String     @default("16px")
   date      DateTime   @default(now())
   createdAt DateTime   @default(now())
@@ -24,4 +26,5 @@ model Post {
 
   @@map("post")
   @@index([slug])
+  @@index([pinned])
 }

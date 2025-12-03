@@ -1,0 +1,55 @@
+/* Admin page color scheme */
+.admin-primary {
+  background-color: oklch(0.5638 0.2255 24.24);
+  color: white;
+}
+
+.admin-primary:hover {
+  background-color: oklch(0.50 0.2255 24.24);
+}
+
+.admin-secondary {
+  background-color: oklch(0.3036 0.1223 288);
+  color: white;
+}
+
+.admin-secondary:hover {
+  background-color: oklch(0.35 0.1223 288);
+}
+
+.admin-border {
+  border-color: oklch(0.3036 0.1223 288);
+}
+
+.admin-text {
+  color: oklch(0.22 0.04 260);
+}
+
+.admin-link {
+  color: oklch(0.5638 0.2255 24.24);
+}
+
+.admin-link:hover {
+  color: oklch(0.50 0.2255 24.24);
+}
+
+.admin-input {
+  border-color: oklch(0.3036 0.1223 288);
+}
+
+.admin-input:focus {
+  border-color: oklch(0.5638 0.2255 24.24);
+  outline: none;
+  ring: 2px;
+  ring-color: oklch(0.5638 0.2255 24.24);
+}
+
+.admin-header-link {
+  color: oklch(0.5638 0.2255 24.24);
+  background-color: oklch(0.5638 0.2255 24.24 / 0.1);
+}
+
+.admin-header-link:hover {
+  background-color: oklch(0.5638 0.2255 24.24 / 0.2);
+}
+

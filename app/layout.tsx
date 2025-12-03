@@ -3,8 +3,8 @@ import Header from '../components/Header';
 import Footer from '../components/Footer';
 
 export const metadata = {
-  title: 'Minimal Blog',
-  description: 'A minimalist personal blog'
+  title: '10SAT Console',
+  description: 'Giao diện quản lý 10SAT'
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
@@ -12,7 +12,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="en">
       <body>
         <Header />
-        <main className="max-w-4xl mx-auto px-4 py-8">{children}</main>
+        <main className="max-w-6xl mx-auto px-4 py-8">{children}</main>
         <Footer />
       </body>
     </html>

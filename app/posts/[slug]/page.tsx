@@ -59,8 +59,8 @@ export default function PostPage() {
   if (!post) {
     return (
       <div className="flex flex-col items-center justify-center min-h-screen">
-        <h1 className="text-2xl font-bold mb-4">Post not found</h1>
-        <Link href="/" className="text-blue-600 hover:underline">
+        <h1 className="text-2xl font-bold mb-4" style={{ color: 'oklch(0.22 0.04 260)' }}>Post not found</h1>
+        <Link href="/" className="hover:opacity-80 transition-opacity" style={{ color: 'oklch(0.5638 0.2255 24.24)' }}>
           ← Back to home
         </Link>
       </div>
@@ -70,12 +70,15 @@ export default function PostPage() {
   return (
     <article className="max-w-3xl mx-auto py-8 px-4">
       <div className="flex items-center justify-between mb-6">
-        <Link href="/" className="text-blue-600 hover:underline">
+        <Link href="/" className="hover:opacity-80 transition-opacity" style={{ color: 'oklch(0.5638 0.2255 24.24)' }}>
           ← Back to home
         </Link>
         <button
           onClick={handleEdit}
-          className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 flex items-center gap-2"
+          className="px-4 py-2 text-white rounded flex items-center gap-2 transition-colors"
+          style={{ backgroundColor: 'oklch(0.5638 0.2255 24.24)' }}
+          onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'oklch(0.50 0.2255 24.24)'}
+          onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'oklch(0.5638 0.2255 24.24)'}
         >
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
@@ -94,8 +97,8 @@ export default function PostPage() {
         </div>
       )}
       
-      <h1 className="text-4xl font-bold mb-4">{post.title}</h1>
-      <p className="text-sm text-slate-500 mb-6">{new Date(post.date).toLocaleDateString()}</p>
+      <h1 className="text-4xl font-bold mb-4" style={{ color: 'oklch(0.22 0.04 260)' }}>{post.title}</h1>
+      <p className="text-sm mb-6" style={{ color: 'oklch(0.4 0.04 260)' }}>{new Date(post.date).toLocaleDateString()}</p>
       <div 
         className="prose prose-lg max-w-none"
         dangerouslySetInnerHTML={{ __html: post.content }} 

@@ -4,6 +4,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import dynamic from 'next/dynamic';
 import StickyEditorToolbar from '../../components/StickyEditorToolbar';
+import '../../styles/admin.css';
 
 const ThumbnailEditor = dynamic(() => import('../../components/ThumbnailEditor'), {
   ssr: false
@@ -24,6 +25,7 @@ export default function AdminPage() {
   const [posts, setPosts] = useState<Post[]>([]);
   const [title, setTitle] = useState('');
   const [slug, setSlug] = useState('');
+  const [topic, setTopic] = useState<number | ''>('');
   const titleRef = useRef<HTMLDivElement | null>(null);
   const excerptRef = useRef<HTMLDivElement | null>(null);
   const [excerpt, setExcerpt] = useState('');
@@ -31,7 +33,8 @@ export default function AdminPage() {
   const contentRef = useRef<HTMLDivElement | null>(null);
   const [fontSize, setFontSize] = useState('16px');
   const [saving, setSaving] = useState(false);
-  const [activeEditorRef, setActiveEditorRef] = useState<React.RefObject<HTMLDivElement>>(titleRef);
+  const [activeEditorRef, setActiveEditorRef] = useState<React.RefObject<HTMLDivElement | null>>(titleRef);
+  const [showPostsList, setShowPostsList] = useState(false);
   
   // Edit state
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -40,7 +43,7 @@ export default function AdminPage() {
   const editExcerptRef = useRef<HTMLDivElement | null>(null);
   const editContentRef = useRef<HTMLDivElement | null>(null);
   const [editThumbnail, setEditThumbnail] = useState('');
-  const [editActiveEditorRef, setEditActiveEditorRef] = useState<React.RefObject<HTMLDivElement>>(editTitleRef);
+  const [editActiveEditorRef, setEditActiveEditorRef] = useState<React.RefObject<HTMLDivElement | null>>(editTitleRef);
 
   useEffect(() => {
     fetch('/api/posts')
@@ -56,6 +59,7 @@ export default function AdminPage() {
       if (editExcerptRef.current) editExcerptRef.current.innerHTML = editingPost.excerpt;
       if (editContentRef.current) editContentRef.current.innerHTML = editingPost.content;
       setEditThumbnail(editingPost.thumbnail || '');
+      // Note: topic is not editable in edit modal as per requirements
     }
   }, [editingId, editingPost]);
 
@@ -192,7 +196,14 @@ export default function AdminPage() {
     const titleHtml = titleRef.current?.innerHTML || title;
     const titleText = titleRef.current?.innerText || title;
     const excerptHtml = excerptRef.current?.innerHTML || excerpt;
-    const payload = { title: titleHtml, slug: slug || makeSlug(titleText), excerpt: excerptHtml, content, thumbnail: thumbnail || null };
+    const payload = { 
+      title: titleHtml, 
+      slug: slug || makeSlug(titleText), 
+      topic: topic || null,
+      excerpt: excerptHtml, 
+      content, 
+      thumbnail: thumbnail || null 
+    };
     try {
       const res = await fetch('/api/posts', {
         method: 'POST',
@@ -204,6 +215,7 @@ export default function AdminPage() {
       setPosts((p) => [created, ...p]);
       setTitle('');
       setSlug('');
+      setTopic('');
       setExcerpt('');
       setThumbnail('');
       if (contentRef.current) contentRef.current.innerHTML = '';
@@ -279,34 +291,57 @@ export default function AdminPage() {
         excerptRef={excerptRef}
         contentRef={contentRef}
       />
-      <h1 className="text-2xl font-semibold mb-4">Dashboard</h1>
+      <h1 className="text-2xl font-semibold mb-4 admin-text">Admin Console</h1>
 
       <form onSubmit={handleSave} className="space-y-4 mb-6">
         <div>
-          <label className="block text-sm">Title</label>
+          <label className="block text-sm admin-text font-medium">Title</label>
           <div
             ref={titleRef}
             contentEditable
             onInput={() => setTitle(titleRef.current?.innerText || '')}
             onKeyDown={handleContentKeyDown}
             onFocus={() => setActiveEditorRef(titleRef)}
-            className="w-full border px-2 py-1 font-semibold text-2xl"
+            className="w-full admin-input border-2 px-2 py-1 font-semibold text-2xl rounded"
+            style={{ color: 'oklch(0.22 0.04 260)' }}
             data-placeholder="Post title"
           />
         </div>
         <div>
-          <label className="block text-sm">Slug (optional)</label>
-          <input value={slug} onChange={(e) => setSlug(e.target.value)} className="w-full border px-2 py-1" />
+          <label className="block text-sm admin-text font-medium">Topic (1-5)</label>
+          <select 
+            value={topic} 
+            onChange={(e) => setTopic(e.target.value ? parseInt(e.target.value) : '')} 
+            className="w-full admin-input border-2 px-2 py-1 rounded"
+            style={{ color: 'oklch(0.22 0.04 260)' }}
+          >
+            <option value="">Select topic...</option>
+            <option value="1">1</option>
+            <option value="2">2</option>
+            <option value="3">3</option>
+            <option value="4">4</option>
+            <option value="5">5</option>
+          </select>
         </div>
         <div>
-          <label className="block text-sm mb-2">Excerpt</label>
-          <div className="border rounded overflow-hidden">
+          <label className="block text-sm admin-text font-medium">Slug (optional)</label>
+          <input 
+            value={slug} 
+            onChange={(e) => setSlug(e.target.value)} 
+            className="w-full admin-input border-2 px-2 py-1 rounded"
+            style={{ color: 'oklch(0.22 0.04 260)' }}
+          />
+        </div>
+        <div>
+          <label className="block text-sm mb-2 admin-text font-medium">Excerpt</label>
+          <div className="admin-input border-2 rounded overflow-hidden">
             <div
               ref={excerptRef}
               contentEditable
               onInput={() => setExcerpt(excerptRef.current?.innerText || '')}
               onFocus={() => setActiveEditorRef(excerptRef)}
               className="w-full min-h-[80px] px-3 py-2 prose"
+              style={{ color: 'oklch(0.22 0.04 260)' }}
               data-placeholder="Write excerpt here..."
             />
           </div>
@@ -315,61 +350,116 @@ export default function AdminPage() {
           <ThumbnailEditor value={thumbnail} onChange={setThumbnail} />
         </div>
         <div>
-          <label className="block text-sm mb-2">Content</label>
-          <div className="border rounded overflow-hidden">
+          <label className="block text-sm mb-2 admin-text font-medium">Content</label>
+          <div className="admin-input border-2 rounded overflow-hidden">
             <div
               ref={contentRef}
               contentEditable
               onKeyDown={handleContentKeyDown}
               onFocus={() => setActiveEditorRef(contentRef)}
+              onDragOver={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+              }}
+              onDrop={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                const files = e.dataTransfer.files;
+                if (files && files.length > 0) {
+                  const file = files[0];
+                  if (file.type.startsWith('image/')) {
+                    const reader = new FileReader();
+                    reader.onload = (event) => {
+                      const img = document.createElement('img');
+                      img.src = event.target?.result as string;
+                      img.style.maxWidth = '100%';
+                      img.style.height = 'auto';
+                      
+                      const selection = window.getSelection();
+                      if (selection && selection.rangeCount > 0) {
+                        const range = selection.getRangeAt(0);
+                        range.insertNode(img);
+                        contentRef.current?.focus();
+                      } else if (contentRef.current) {
+                        contentRef.current.appendChild(img);
+                        contentRef.current.focus();
+                      }
+                    };
+                    reader.readAsDataURL(file);
+                  }
+                }
+              }}
               className="w-full min-h-[300px] px-3 py-2 prose"
+              style={{ color: 'oklch(0.22 0.04 260)' }}
               data-placeholder="Write your post here..."
             />
           </div>
         </div>
         <div>
-          <button type="submit" disabled={saving} className="px-4 py-2 bg-sky-600 text-white rounded">
+          <button type="submit" disabled={saving} className="admin-primary px-4 py-2 text-white rounded transition-colors disabled:opacity-50">
             {saving ? 'Saving...' : 'Post'}
           </button>
         </div>
       </form>
 
       <div className="space-y-3">
-        <div className="text-sm text-slate-600">Posts ({posts.length})</div>
-          <ul className="list-disc pl-5">
-          {posts.map((p) => (
-            <li key={p.id} className="flex items-center justify-between gap-4">
-              <div className="flex-1">
-                <Link 
-                  href={`/posts/${p.slug}`}
-                  className="font-medium hover:text-blue-600 transition-colors"
+        <div className="flex items-center justify-between">
+          <button
+            type="button"
+            onClick={() => setShowPostsList(!showPostsList)}
+            className="flex items-center gap-2 px-4 py-2 admin-secondary rounded transition-colors text-sm"
+          >
+            <span>{showPostsList ? 'Hide' : 'Show'} Posts</span>
+            <svg
+              className={`w-4 h-4 transition-transform ${showPostsList ? 'rotate-180' : ''}`}
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+            </svg>
+          </button>
+          {showPostsList && (
+            <div className="text-sm admin-text font-medium">Posts ({posts.length})</div>
+          )}
+        </div>
+        
+        {showPostsList && (
+          <ul className="list-disc pl-5 space-y-2">
+            {posts.map((p) => (
+              <li key={p.id} className="flex items-center justify-between gap-4 py-2 border-b admin-border">
+                <div className="flex-1">
+                  <Link 
+                    href={`/posts/${p.slug}`}
+                    className="font-medium admin-link transition-colors"
+                  >
+                    {p.title}
+                  </Link>
+                </div>
+                <button 
+                  type="button" 
+                  onClick={(e) => {
+                    e.preventDefault();
+                    openEditModal(p);
+                  }} 
+                  title="Edit"
+                  className="p-2 admin-link hover:opacity-80 rounded transition"
                 >
-                  {p.title}
-                </Link>
-              </div>
-              <button 
-                type="button" 
-                onClick={(e) => {
-                  e.preventDefault();
-                  openEditModal(p);
-                }} 
-                title="Edit"
-                className="p-2 text-blue-500 hover:text-blue-700 hover:bg-blue-50 rounded transition"
-              >
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                </svg>
-              </button>
-            </li>
-          ))}
-        </ul>
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                  </svg>
+                </button>
+              </li>
+            ))}
+          </ul>
+        )}
       </div>
 
       {/* Edit Modal */}
       {editingId && editingPost && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 overflow-y-auto">
-          <div className="bg-white rounded-lg shadow-lg w-full max-w-6xl my-8 flex flex-col p-6">
-            <h2 className="text-xl font-semibold mb-4">Edit Post</h2>
+          <div className="bg-white rounded-lg shadow-lg w-full max-w-6xl my-8 flex flex-col p-6" style={{ backgroundColor: 'oklch(0.98 0.01 260)' }}>
+            <h2 className="text-xl font-semibold mb-4 admin-text">Edit Post</h2>
             
             <StickyEditorToolbar
               activeEditorRef={editActiveEditorRef}
@@ -380,22 +470,24 @@ export default function AdminPage() {
             
             <div className="space-y-4 flex-1">
               <div>
-                <label className="block text-sm mb-2">Title</label>
+                <label className="block text-sm mb-2 admin-text font-medium">Title</label>
                 <div
                   ref={editTitleRef}
                   contentEditable
                   onFocus={() => setEditActiveEditorRef(editTitleRef)}
-                  className="w-full border px-2 py-1 font-semibold text-2xl"
+                  className="w-full admin-input border-2 px-2 py-1 font-semibold text-2xl rounded"
+                  style={{ color: 'oklch(0.22 0.04 260)' }}
                 />
               </div>
               
               <div>
-                <label className="block text-sm mb-2">Excerpt</label>
+                <label className="block text-sm mb-2 admin-text font-medium">Excerpt</label>
                 <div
                   ref={editExcerptRef}
                   contentEditable
                   onFocus={() => setEditActiveEditorRef(editExcerptRef)}
-                  className="w-full min-h-[80px] border px-3 py-2 prose"
+                  className="w-full min-h-[80px] admin-input border-2 px-3 py-2 prose rounded"
+                  style={{ color: 'oklch(0.22 0.04 260)' }}
                 />
               </div>
               
@@ -404,22 +496,23 @@ export default function AdminPage() {
               </div>
               
               <div>
-                <label className="block text-sm mb-2">Content</label>
+                <label className="block text-sm mb-2 admin-text font-medium">Content</label>
                 <div
                   ref={editContentRef}
                   contentEditable
                   onKeyDown={handleContentKeyDown}
                   onFocus={() => setEditActiveEditorRef(editContentRef)}
-                  className="w-full min-h-[300px] border px-3 py-2 prose"
+                  className="w-full min-h-[300px] admin-input border-2 px-3 py-2 prose rounded"
+                  style={{ color: 'oklch(0.22 0.04 260)' }}
                 />
               </div>
             </div>
 
-            <div className="flex gap-2 justify-end mt-4 border-t pt-4">
+            <div className="flex gap-2 justify-end mt-4 border-t admin-border pt-4">
               <button 
                 type="button" 
                 onClick={cancelEdit} 
-                className="px-4 py-2 bg-gray-400 text-white rounded hover:bg-gray-500"
+                className="px-4 py-2 admin-secondary rounded transition-colors"
               >
                 Cancel
               </button>
@@ -427,7 +520,7 @@ export default function AdminPage() {
                 type="button" 
                 onClick={handleUpdatePost} 
                 disabled={saving}
-                className="px-4 py-2 bg-sky-600 text-white rounded hover:bg-sky-700 disabled:bg-gray-400"
+                className="px-4 py-2 admin-primary rounded transition-colors disabled:opacity-50"
               >
                 {saving ? 'Saving...' : 'Save Changes'}
               </button>
