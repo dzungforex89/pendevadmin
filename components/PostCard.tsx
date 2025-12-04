@@ -93,66 +93,99 @@ export default function PostCard({ post, onPinToggle, isSelected = false, onSele
     setShowMenu(false);
   };
 
+  // Strip HTML tags for excerpt display
+  const stripHtml = (html: string) => {
+    const tmp = document.createElement('DIV');
+    tmp.innerHTML = html;
+    return tmp.textContent || tmp.innerText || '';
+  };
+
   return (
     <div 
-      className="relative"
+      className="relative group"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
-      <Link href={`/posts/${post.slug}`} className="block">
+      <Link href={`/posts/${post.slug}`} className="block cursor-pointer">
         <article 
-          className="rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow h-full flex flex-col"
+          className="rounded-xl overflow-hidden bg-white border transition-all duration-200 h-full flex flex-col hover:shadow-lg"
           style={{
-            borderColor: isSelected ? 'oklch(0.5638 0.2255 24.24)' : 'oklch(0.3036 0.1223 288)',
-            borderWidth: isSelected ? '2px' : '1px'
+            borderColor: isSelected ? 'oklch(0.5638 0.2255 24.24)' : 'oklch(0.3036 0.1223 288 / 0.3)',
+            borderWidth: isSelected ? '2px' : '1px',
+            boxShadow: isSelected ? '0 4px 12px oklch(0.5638 0.2255 24.24 / 0.2)' : '0 1px 3px oklch(0.22 0.04 260 / 0.1)',
           }}
         >
-          <div className="relative w-full h-48 bg-gray-200 overflow-hidden">
+          <div className="relative w-full h-48 bg-gray-100 overflow-hidden">
             <img 
               src={thumbnailSrc} 
               alt={post.title}
-              className="w-full h-full object-cover"
+              className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
             />
             {post.pinned && (
               <div 
-                className="absolute top-2 left-2 px-2 py-1 rounded text-xs font-semibold z-10"
+                className="absolute top-3 left-3 px-2.5 py-1 rounded-md text-xs font-semibold z-10 flex items-center gap-1.5"
                 style={{
                   backgroundColor: 'oklch(0.5638 0.2255 24.24)',
-                  color: 'white'
+                  color: 'white',
+                  boxShadow: '0 2px 8px oklch(0.5638 0.2255 24.24 / 0.3)'
                 }}
               >
-                📌 Pinned
+                <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20">
+                  <path d="M5 4a2 2 0 012-2h6a2 2 0 012 2v14l-5-2.5L5 18V4z" />
+                </svg>
+                Pinned
               </div>
             )}
           </div>
-          <div className="p-4 flex-1">
+          <div className="p-5 flex-1 flex flex-col">
             <h3 
-              className="text-lg font-semibold mb-2 line-clamp-2 transition-colors"
+              className="text-lg font-semibold mb-2 line-clamp-2 transition-colors duration-200"
               style={{ color: 'oklch(0.22 0.04 260)' }}
-              onMouseEnter={(e) => e.currentTarget.style.color = 'oklch(0.5638 0.2255 24.24)'}
-              onMouseLeave={(e) => e.currentTarget.style.color = 'oklch(0.22 0.04 260)'}
             >
-              {post.title}
+              {stripHtml(post.title)}
             </h3>
-            <p className="text-sm line-clamp-3" style={{ color: 'oklch(0.4 0.04 260)' }}>{post.excerpt}</p>
+            <p 
+              className="text-sm line-clamp-3 flex-1" 
+              style={{ color: 'oklch(0.45 0.04 260)' }}
+            >
+              {stripHtml(post.excerpt)}
+            </p>
+            <div className="mt-3 text-xs" style={{ color: 'oklch(0.5 0.04 260)' }}>
+              {new Date(post.date).toLocaleDateString('vi-VN', { 
+                year: 'numeric', 
+                month: 'long', 
+                day: 'numeric' 
+              })}
+            </div>
           </div>
         </article>
       </Link>
       
       {/* Checkbox for selection - only show on hover */}
       {onSelect && (isHovered || isSelected) && (
-        <div className="absolute top-2 left-2 z-20">
-          <input
-            type="checkbox"
-            checked={isSelected}
-            onChange={handleCheckboxChange}
-            onClick={(e) => {
-              e.preventDefault();
-              e.stopPropagation();
+        <div 
+          className="absolute top-3 left-3 z-20 cursor-pointer"
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            if (onSelect) {
+              onSelect(post.id, !isSelected);
+            }
+          }}
+        >
+          <div 
+            className="w-5 h-5 rounded border-2 flex items-center justify-center transition-all duration-200"
+            style={{
+              borderColor: isSelected ? 'oklch(0.5638 0.2255 24.24)' : 'oklch(0.3036 0.1223 288)',
+              backgroundColor: isSelected ? 'oklch(0.5638 0.2255 24.24)' : 'white',
             }}
-            className="w-5 h-5 cursor-pointer"
-            style={{ accentColor: 'oklch(0.5638 0.2255 24.24)' }}
-          />
+          >
+            {isSelected && (
+              <svg className="w-3.5 h-3.5 text-white" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+              </svg>
+            )}
+          </div>
         </div>
       )}
       
@@ -164,13 +197,19 @@ export default function PostCard({ post, onPinToggle, isSelected = false, onSele
             e.stopPropagation();
             setShowMenu(!showMenu);
           }}
-          className="absolute top-2 right-2 p-2 rounded-full shadow-md transition-colors z-10"
+          className="absolute top-3 right-3 p-2 rounded-lg shadow-md transition-all duration-200 z-10 cursor-pointer hover:shadow-lg"
           style={{
             backgroundColor: 'white',
-            color: 'oklch(0.22 0.04 260)'
+            color: 'oklch(0.22 0.04 260)',
           }}
-          onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'oklch(0.98 0.01 260)'}
-          onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'white'}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.backgroundColor = 'oklch(0.98 0.01 260)';
+            e.currentTarget.style.transform = 'scale(1.05)';
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.backgroundColor = 'white';
+            e.currentTarget.style.transform = 'scale(1)';
+          }}
           title="More options"
         >
           <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
@@ -183,38 +222,59 @@ export default function PostCard({ post, onPinToggle, isSelected = false, onSele
       {showMenu && (
         <div
           ref={menuRef}
-          className="absolute top-10 right-2 rounded-lg shadow-lg py-1 z-20 min-w-[120px]"
+          className="absolute top-12 right-3 rounded-lg shadow-xl py-1.5 z-20 min-w-[140px] border transition-all duration-200"
           style={{
             backgroundColor: 'white',
-            borderColor: 'oklch(0.3036 0.1223 288)',
-            borderWidth: '1px'
+            borderColor: 'oklch(0.3036 0.1223 288 / 0.2)',
+            boxShadow: '0 4px 12px oklch(0.22 0.04 260 / 0.15)'
           }}
         >
           <button
             onClick={handleSelect}
-            className="w-full text-left px-4 py-2 text-sm transition-colors"
+            className="w-full text-left px-4 py-2 text-sm transition-colors duration-200 cursor-pointer flex items-center gap-2"
             style={{ color: 'oklch(0.22 0.04 260)' }}
-            onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'oklch(0.98 0.01 260)'}
-            onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.backgroundColor = 'oklch(0.95 0.01 260)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.backgroundColor = 'transparent';
+            }}
           >
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
             Select
           </button>
           <button
             onClick={handleEdit}
-            className="w-full text-left px-4 py-2 text-sm transition-colors"
+            className="w-full text-left px-4 py-2 text-sm transition-colors duration-200 cursor-pointer flex items-center gap-2"
             style={{ color: 'oklch(0.22 0.04 260)' }}
-            onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'oklch(0.98 0.01 260)'}
-            onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.backgroundColor = 'oklch(0.95 0.01 260)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.backgroundColor = 'transparent';
+            }}
           >
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+            </svg>
             Edit
           </button>
           <button
             onClick={handlePin}
-            className="w-full text-left px-4 py-2 text-sm transition-colors"
+            className="w-full text-left px-4 py-2 text-sm transition-colors duration-200 cursor-pointer flex items-center gap-2"
             style={{ color: 'oklch(0.22 0.04 260)' }}
-            onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'oklch(0.98 0.01 260)'}
-            onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.backgroundColor = 'oklch(0.95 0.01 260)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.backgroundColor = 'transparent';
+            }}
           >
+            <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+              <path d="M5 4a2 2 0 012-2h6a2 2 0 012 2v14l-5-2.5L5 18V4z" />
+            </svg>
             {post.pinned ? 'Unpin' : 'Pin'}
           </button>
         </div>

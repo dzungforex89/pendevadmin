@@ -111,102 +111,145 @@ export default function HomeFrontend({ initialPosts = [] }: HomeFrontendProps) {
   }, [searchQuery, showPinnedOnly]);
 
   return (
-    <section>
-      <div className="mb-6">
-        <h1 className="text-3xl font-bold mb-4" style={{ color: 'oklch(0.22 0.04 260)' }}>Latest Posts</h1>
-        <div className="flex gap-4 items-center flex-wrap">
-          <div className="relative flex-1 min-w-[200px]">
+    <section className="space-y-8">
+      {/* Header Section */}
+      <div className="space-y-6">
+        <div>
+          <h1 
+            className="text-4xl font-bold mb-2"
+            style={{ color: 'oklch(0.22 0.04 260)' }}
+          >
+            Latest Posts
+          </h1>
+          <p 
+            className="text-base"
+            style={{ color: 'oklch(0.5 0.04 260)' }}
+          >
+            Discover our latest articles and insights
+          </p>
+        </div>
+
+        {/* Search and Filter Bar */}
+        <div className="flex flex-col sm:flex-row gap-4 items-stretch sm:items-center">
+          <div className="relative flex-1">
             <input
               type="text"
               placeholder="Search by title..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full rounded-lg px-4 py-2 pl-10 focus:outline-none transition-colors"
+              className="w-full rounded-xl px-4 py-3 pl-11 border transition-all duration-200 focus:outline-none focus:ring-2 cursor-pointer"
               style={{
-                borderColor: 'oklch(0.3036 0.1223 288)',
-                borderWidth: '1px',
-                color: 'oklch(0.22 0.04 260)'
+                borderColor: 'oklch(0.3036 0.1223 288 / 0.3)',
+                color: 'oklch(0.22 0.04 260)',
+                backgroundColor: 'white',
               }}
               onFocus={(e) => {
                 e.target.style.borderColor = 'oklch(0.5638 0.2255 24.24)';
-                e.target.style.boxShadow = '0 0 0 2px oklch(0.5638 0.2255 24.24 / 0.2)';
+                e.target.style.boxShadow = '0 0 0 3px oklch(0.5638 0.2255 24.24 / 0.1)';
               }}
               onBlur={(e) => {
-                e.target.style.borderColor = 'oklch(0.3036 0.1223 288)';
+                e.target.style.borderColor = 'oklch(0.3036 0.1223 288 / 0.3)';
                 e.target.style.boxShadow = 'none';
               }}
             />
             <svg
-              className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5"
+              className="absolute left-3.5 top-1/2 transform -translate-y-1/2 w-5 h-5 pointer-events-none"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
-              style={{ color: 'oklch(0.4 0.04 260)' }}
+              style={{ color: 'oklch(0.5 0.04 260)' }}
             >
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
             </svg>
           </div>
           <button
             onClick={() => setShowPinnedOnly(!showPinnedOnly)}
-            className="px-4 py-2 rounded-lg transition-colors"
+            className="px-5 py-3 rounded-xl border transition-all duration-200 cursor-pointer font-medium flex items-center gap-2 whitespace-nowrap"
             style={{
-              backgroundColor: showPinnedOnly ? 'oklch(0.5638 0.2255 24.24)' : 'transparent',
-              borderColor: 'oklch(0.3036 0.1223 288)',
-              borderWidth: '1px',
-              color: showPinnedOnly ? 'white' : 'oklch(0.22 0.04 260)'
+              backgroundColor: showPinnedOnly ? 'oklch(0.5638 0.2255 24.24)' : 'white',
+              borderColor: showPinnedOnly ? 'oklch(0.5638 0.2255 24.24)' : 'oklch(0.3036 0.1223 288 / 0.3)',
+              color: showPinnedOnly ? 'white' : 'oklch(0.22 0.04 260)',
             }}
             onMouseEnter={(e) => {
               if (!showPinnedOnly) {
                 e.currentTarget.style.backgroundColor = 'oklch(0.98 0.01 260)';
+                e.currentTarget.style.borderColor = 'oklch(0.5638 0.2255 24.24)';
               }
             }}
             onMouseLeave={(e) => {
               if (!showPinnedOnly) {
-                e.currentTarget.style.backgroundColor = 'transparent';
+                e.currentTarget.style.backgroundColor = 'white';
+                e.currentTarget.style.borderColor = 'oklch(0.3036 0.1223 288 / 0.3)';
               }
             }}
           >
-            {showPinnedOnly ? '📌 Showing Pinned' : '📌 Show Pinned Only'}
+            <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+              <path d="M5 4a2 2 0 012-2h6a2 2 0 012 2v14l-5-2.5L5 18V4z" />
+            </svg>
+            {showPinnedOnly ? 'Showing Pinned' : 'Show Pinned Only'}
           </button>
         </div>
         
         {/* Selected posts actions */}
         {selectedPosts.size > 0 && (
           <div 
-            className="mt-4 flex items-center gap-4 p-4 rounded-lg"
+            className="flex items-center justify-between gap-4 p-4 rounded-xl border transition-all duration-200"
             style={{
               backgroundColor: 'oklch(0.98 0.01 260)',
-              borderColor: 'oklch(0.3036 0.1223 288)',
-              borderWidth: '1px'
+              borderColor: 'oklch(0.5638 0.2255 24.24)',
+              borderWidth: '2px',
+              boxShadow: '0 2px 8px oklch(0.5638 0.2255 24.24 / 0.15)'
             }}
           >
-            <span className="text-sm font-medium" style={{ color: 'oklch(0.22 0.04 260)' }}>
+            <span className="text-sm font-semibold flex items-center gap-2" style={{ color: 'oklch(0.22 0.04 260)' }}>
+              <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+              </svg>
               {selectedPosts.size} post(s) selected
             </span>
-            <button
-              onClick={handleUnselectAll}
-              className="px-4 py-2 rounded text-sm transition-colors"
-              style={{
-                backgroundColor: 'oklch(0.3036 0.1223 288)',
-                color: 'white'
-              }}
-              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'oklch(0.35 0.1223 288)'}
-              onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'oklch(0.3036 0.1223 288)'}
-            >
-              Unselect All
-            </button>
-            <button
-              onClick={handleDeleteSelected}
-              className="px-4 py-2 text-white rounded text-sm transition-colors"
-              style={{ backgroundColor: 'oklch(0.5638 0.2255 24.24)' }}
-              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'oklch(0.50 0.2255 24.24)'}
-              onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'oklch(0.5638 0.2255 24.24)'}
-            >
-              Delete Selected
-            </button>
+            <div className="flex items-center gap-3">
+              <button
+                onClick={handleUnselectAll}
+                className="px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 cursor-pointer"
+                style={{
+                  backgroundColor: 'oklch(0.3036 0.1223 288)',
+                  color: 'white'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.backgroundColor = 'oklch(0.35 0.1223 288)';
+                  e.currentTarget.style.transform = 'translateY(-1px)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.backgroundColor = 'oklch(0.3036 0.1223 288)';
+                  e.currentTarget.style.transform = 'translateY(0)';
+                }}
+              >
+                Unselect All
+              </button>
+              <button
+                onClick={handleDeleteSelected}
+                className="px-4 py-2 text-white rounded-lg text-sm font-medium transition-all duration-200 cursor-pointer flex items-center gap-2"
+                style={{ backgroundColor: 'oklch(0.5638 0.2255 24.24)' }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.backgroundColor = 'oklch(0.50 0.2255 24.24)';
+                  e.currentTarget.style.transform = 'translateY(-1px)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.backgroundColor = 'oklch(0.5638 0.2255 24.24)';
+                  e.currentTarget.style.transform = 'translateY(0)';
+                }}
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                </svg>
+                Delete Selected
+              </button>
+            </div>
           </div>
         )}
       </div>
+
+      {/* Posts Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {paginatedPosts.length > 0 ? (
           paginatedPosts.map((p) => (
@@ -220,21 +263,44 @@ export default function HomeFrontend({ initialPosts = [] }: HomeFrontendProps) {
             />
           ))
         ) : (
-          <div className="col-span-full text-center py-8" style={{ color: 'oklch(0.4 0.04 260)' }}>
-            {searchQuery || showPinnedOnly
-              ? 'No posts found matching your search.'
-              : 'No posts yet.'}
+          <div 
+            className="col-span-full text-center py-16 rounded-xl border"
+            style={{ 
+              color: 'oklch(0.5 0.04 260)',
+              borderColor: 'oklch(0.3036 0.1223 288 / 0.2)',
+              backgroundColor: 'oklch(0.98 0.01 260)'
+            }}
+          >
+            <svg 
+              className="w-16 h-16 mx-auto mb-4 opacity-50"
+              fill="none" 
+              stroke="currentColor" 
+              viewBox="0 0 24 24"
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <p className="text-lg font-medium">
+              {searchQuery || showPinnedOnly
+                ? 'No posts found matching your search.'
+                : 'No posts yet.'}
+            </p>
+            <p className="text-sm mt-2">
+              {searchQuery || showPinnedOnly
+                ? 'Try adjusting your search or filter.'
+                : 'Start creating your first post in the admin panel.'}
+            </p>
           </div>
         )}
       </div>
       
-      <Pagination
-        currentPage={currentPage}
-        totalPages={totalPages}
-        onPageChange={setCurrentPage}
-      />
+      {/* Pagination */}
+      {totalPages > 1 && (
+        <Pagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPageChange={setCurrentPage}
+        />
+      )}
     </section>
   );
 }
-
-

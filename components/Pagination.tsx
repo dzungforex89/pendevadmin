@@ -51,29 +51,41 @@ export default function Pagination({ currentPage, totalPages, onPageChange }: Pa
       <button
         onClick={() => onPageChange(currentPage - 1)}
         disabled={currentPage === 1}
-        className="px-3 py-2 rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+        className="px-4 py-2 rounded-xl border transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer font-medium"
         style={{
-          borderColor: 'oklch(0.3036 0.1223 288)',
-          borderWidth: '1px',
+          borderColor: currentPage === 1 ? 'oklch(0.3036 0.1223 288 / 0.2)' : 'oklch(0.3036 0.1223 288 / 0.3)',
           color: currentPage === 1 ? 'oklch(0.5 0.04 260)' : 'oklch(0.22 0.04 260)',
-          backgroundColor: 'transparent'
+          backgroundColor: 'white'
         }}
         onMouseEnter={(e) => {
           if (currentPage !== 1) {
             e.currentTarget.style.backgroundColor = 'oklch(0.98 0.01 260)';
+            e.currentTarget.style.borderColor = 'oklch(0.5638 0.2255 24.24)';
           }
         }}
         onMouseLeave={(e) => {
-          e.currentTarget.style.backgroundColor = 'transparent';
+          if (currentPage !== 1) {
+            e.currentTarget.style.backgroundColor = 'white';
+            e.currentTarget.style.borderColor = 'oklch(0.3036 0.1223 288 / 0.3)';
+          }
         }}
       >
-        Previous
+        <span className="flex items-center gap-1.5">
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+          </svg>
+          Previous
+        </span>
       </button>
 
       {getPageNumbers().map((page, index) => {
         if (page === '...') {
           return (
-            <span key={`ellipsis-${index}`} className="px-2" style={{ color: 'oklch(0.4 0.04 260)' }}>
+            <span 
+              key={`ellipsis-${index}`} 
+              className="px-2"
+              style={{ color: 'oklch(0.5 0.04 260)' }}
+            >
               ...
             </span>
           );
@@ -85,21 +97,23 @@ export default function Pagination({ currentPage, totalPages, onPageChange }: Pa
           <button
             key={pageNum}
             onClick={() => onPageChange(pageNum)}
-            className="px-3 py-2 rounded transition-colors"
+            className="px-4 py-2 rounded-xl border transition-all duration-200 cursor-pointer font-medium min-w-[44px]"
             style={{
-              backgroundColor: isActive ? 'oklch(0.5638 0.2255 24.24)' : 'transparent',
-              borderColor: 'oklch(0.3036 0.1223 288)',
-              borderWidth: '1px',
-              color: isActive ? 'white' : 'oklch(0.22 0.04 260)'
+              backgroundColor: isActive ? 'oklch(0.5638 0.2255 24.24)' : 'white',
+              borderColor: isActive ? 'oklch(0.5638 0.2255 24.24)' : 'oklch(0.3036 0.1223 288 / 0.3)',
+              color: isActive ? 'white' : 'oklch(0.22 0.04 260)',
+              boxShadow: isActive ? '0 2px 8px oklch(0.5638 0.2255 24.24 / 0.3)' : 'none'
             }}
             onMouseEnter={(e) => {
               if (!isActive) {
                 e.currentTarget.style.backgroundColor = 'oklch(0.98 0.01 260)';
+                e.currentTarget.style.borderColor = 'oklch(0.5638 0.2255 24.24)';
               }
             }}
             onMouseLeave={(e) => {
               if (!isActive) {
-                e.currentTarget.style.backgroundColor = 'transparent';
+                e.currentTarget.style.backgroundColor = 'white';
+                e.currentTarget.style.borderColor = 'oklch(0.3036 0.1223 288 / 0.3)';
               }
             }}
           >
@@ -111,25 +125,32 @@ export default function Pagination({ currentPage, totalPages, onPageChange }: Pa
       <button
         onClick={() => onPageChange(currentPage + 1)}
         disabled={currentPage === totalPages}
-        className="px-3 py-2 rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+        className="px-4 py-2 rounded-xl border transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer font-medium"
         style={{
-          borderColor: 'oklch(0.3036 0.1223 288)',
-          borderWidth: '1px',
+          borderColor: currentPage === totalPages ? 'oklch(0.3036 0.1223 288 / 0.2)' : 'oklch(0.3036 0.1223 288 / 0.3)',
           color: currentPage === totalPages ? 'oklch(0.5 0.04 260)' : 'oklch(0.22 0.04 260)',
-          backgroundColor: 'transparent'
+          backgroundColor: 'white'
         }}
         onMouseEnter={(e) => {
           if (currentPage !== totalPages) {
             e.currentTarget.style.backgroundColor = 'oklch(0.98 0.01 260)';
+            e.currentTarget.style.borderColor = 'oklch(0.5638 0.2255 24.24)';
           }
         }}
         onMouseLeave={(e) => {
-          e.currentTarget.style.backgroundColor = 'transparent';
+          if (currentPage !== totalPages) {
+            e.currentTarget.style.backgroundColor = 'white';
+            e.currentTarget.style.borderColor = 'oklch(0.3036 0.1223 288 / 0.3)';
+          }
         }}
       >
-        Next
+        <span className="flex items-center gap-1.5">
+          Next
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+          </svg>
+        </span>
       </button>
     </div>
   );
 }
-
