@@ -2,6 +2,7 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
+import RelatedArticles from '../../../components/RelatedArticles';
 
 type Post = {
   id: string;
@@ -180,6 +181,9 @@ export default function PostPage() {
         }}
         dangerouslySetInnerHTML={{ __html: post.content }} 
       />
+
+      {/* Related Articles */}
+      {post.slug && <RelatedArticles currentSlug={post.slug} />}
     </article>
   );
 }

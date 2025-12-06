@@ -4,6 +4,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import dynamic from 'next/dynamic';
 import StickyEditorToolbar from '../components/StickyEditorToolbar';
+import RelatedArticlesSelector from '../components/RelatedArticlesSelector';
 import '../styles/admin.css';
 
 const ThumbnailEditor = dynamic(() => import('../components/ThumbnailEditor'), {
@@ -18,6 +19,7 @@ export type Post = {
   content: string;
   thumbnail?: string | null;
   date: string;
+  relatedArticles?: string[] | null;
 };
 
 type AdminFrontendProps = {
@@ -29,11 +31,12 @@ export default function AdminFrontend({ initialPosts = [] }: AdminFrontendProps)
   const [posts, setPosts] = useState<Post[]>(initialPosts);
   const [title, setTitle] = useState('');
   const [slug, setSlug] = useState('');
-  const [topic, setTopic] = useState<number | ''>('');
+  const [topic, setTopic] = useState<string>('');
   const titleRef = useRef<HTMLDivElement | null>(null);
   const excerptRef = useRef<HTMLDivElement | null>(null);
   const [excerpt, setExcerpt] = useState('');
   const [thumbnail, setThumbnail] = useState('');
+  const [relatedArticles, setRelatedArticles] = useState<string[] | null>(null);
   const contentRef = useRef<HTMLDivElement | null>(null);
   const [fontSize, setFontSize] = useState('16px');
   const [saving, setSaving] = useState(false);
@@ -47,6 +50,7 @@ export default function AdminFrontend({ initialPosts = [] }: AdminFrontendProps)
   const editExcerptRef = useRef<HTMLDivElement | null>(null);
   const editContentRef = useRef<HTMLDivElement | null>(null);
   const [editThumbnail, setEditThumbnail] = useState('');
+  const [editRelatedArticles, setEditRelatedArticles] = useState<string[] | null>(null);
   const [editActiveEditorRef, setEditActiveEditorRef] = useState<React.RefObject<HTMLDivElement | null>>(editTitleRef);
 
   useEffect(() => {
@@ -63,6 +67,7 @@ export default function AdminFrontend({ initialPosts = [] }: AdminFrontendProps)
       if (editExcerptRef.current) editExcerptRef.current.innerHTML = editingPost.excerpt;
       if (editContentRef.current) editContentRef.current.innerHTML = editingPost.content;
       setEditThumbnail(editingPost.thumbnail || '');
+      setEditRelatedArticles(editingPost.relatedArticles || null);
       // Note: topic is not editable in edit modal as per requirements
     }
   }, [editingId, editingPost]);
@@ -206,7 +211,8 @@ export default function AdminFrontend({ initialPosts = [] }: AdminFrontendProps)
       topic: topic || null,
       excerpt: excerptHtml, 
       content, 
-      thumbnail: thumbnail || null 
+      thumbnail: thumbnail || null,
+      relatedArticles: relatedArticles || null
     };
     try {
       const res = await fetch('/api/posts', {
@@ -222,6 +228,7 @@ export default function AdminFrontend({ initialPosts = [] }: AdminFrontendProps)
       setTopic('');
       setExcerpt('');
       setThumbnail('');
+      setRelatedArticles(null);
       if (contentRef.current) contentRef.current.innerHTML = '';
       if (titleRef.current) titleRef.current.innerHTML = '';
       if (excerptRef.current) excerptRef.current.innerHTML = '';
@@ -266,7 +273,8 @@ export default function AdminFrontend({ initialPosts = [] }: AdminFrontendProps)
           title: titleHtml,
           excerpt: excerptHtml,
           content: contentHtml,
-          thumbnail: editThumbnail || null
+          thumbnail: editThumbnail || null,
+          relatedArticles: editRelatedArticles || null
         })
       });
       if (!res.ok) throw new Error('Failed to update');
@@ -285,6 +293,7 @@ export default function AdminFrontend({ initialPosts = [] }: AdminFrontendProps)
   function cancelEdit() {
     setEditingId(null);
     setEditingPost(null);
+    setEditRelatedArticles(null);
   }
 
   return (
@@ -312,19 +321,17 @@ export default function AdminFrontend({ initialPosts = [] }: AdminFrontendProps)
           />
         </div>
         <div>
-          <label className="block text-sm admin-text font-medium">Topic (1-5)</label>
+          <label className="block text-sm admin-text font-medium">Topic</label>
           <select 
             value={topic} 
-            onChange={(e) => setTopic(e.target.value ? parseInt(e.target.value) : '')} 
+            onChange={(e) => setTopic(e.target.value)} 
             className="w-full admin-input border-2 px-2 py-1 rounded"
             style={{ color: 'oklch(0.22 0.04 260)' }}
           >
             <option value="">Select topic...</option>
-            <option value="1">1</option>
-            <option value="2">2</option>
-            <option value="3">3</option>
-            <option value="4">4</option>
-            <option value="5">5</option>
+            <option value="A">A</option>
+            <option value="B">B</option>
+            <option value="C">C</option>
           </select>
         </div>
         <div>
@@ -400,8 +407,52 @@ export default function AdminFrontend({ initialPosts = [] }: AdminFrontendProps)
           </div>
         </div>
         <div>
-          <button type="submit" disabled={saving} className="admin-primary px-4 py-2 text-white rounded transition-colors disabled:opacity-50">
-            {saving ? 'Saving...' : 'Post'}
+          <RelatedArticlesSelector
+            value={relatedArticles}
+            onChange={setRelatedArticles}
+            maxSelections={3}
+          />
+        </div>
+        <div className="flex justify-end mt-6">
+          <button 
+            type="submit" 
+            disabled={saving} 
+            className="admin-primary px-6 py-3 text-white rounded-lg font-semibold text-base shadow-lg hover:shadow-xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer flex items-center gap-2"
+            style={{
+              backgroundColor: 'oklch(0.5638 0.2255 24.24)',
+              boxShadow: '0 4px 6px -1px oklch(0.5638 0.2255 24.24 / 0.3), 0 2px 4px -1px oklch(0.5638 0.2255 24.24 / 0.2)'
+            }}
+            onMouseEnter={(e) => {
+              if (!saving) {
+                e.currentTarget.style.backgroundColor = 'oklch(0.50 0.2255 24.24)';
+                e.currentTarget.style.transform = 'translateY(-1px)';
+                e.currentTarget.style.boxShadow = '0 10px 15px -3px oklch(0.5638 0.2255 24.24 / 0.4), 0 4px 6px -2px oklch(0.5638 0.2255 24.24 / 0.3)';
+              }
+            }}
+            onMouseLeave={(e) => {
+              if (!saving) {
+                e.currentTarget.style.backgroundColor = 'oklch(0.5638 0.2255 24.24)';
+                e.currentTarget.style.transform = 'translateY(0)';
+                e.currentTarget.style.boxShadow = '0 4px 6px -1px oklch(0.5638 0.2255 24.24 / 0.3), 0 2px 4px -1px oklch(0.5638 0.2255 24.24 / 0.2)';
+              }
+            }}
+          >
+            {saving ? (
+              <>
+                <svg className="animate-spin h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                <span>Saving...</span>
+              </>
+            ) : (
+              <>
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                </svg>
+                <span>Post</span>
+              </>
+            )}
           </button>
         </div>
       </form>
@@ -508,6 +559,15 @@ export default function AdminFrontend({ initialPosts = [] }: AdminFrontendProps)
                   onFocus={() => setEditActiveEditorRef(editContentRef)}
                   className="w-full min-h-[300px] admin-input border-2 px-3 py-2 prose rounded"
                   style={{ color: 'oklch(0.22 0.04 260)' }}
+                />
+              </div>
+              
+              <div>
+                <RelatedArticlesSelector
+                  value={editRelatedArticles}
+                  onChange={setEditRelatedArticles}
+                  excludePostId={editingId || undefined}
+                  maxSelections={3}
                 />
               </div>
             </div>

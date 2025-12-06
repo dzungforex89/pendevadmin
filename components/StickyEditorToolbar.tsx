@@ -16,6 +16,7 @@ export default function StickyEditorToolbar({
   contentRef 
 }: StickyEditorToolbarProps) {
   const [isVisible, setIsVisible] = useState(false);
+  const [toolbarStyle, setToolbarStyle] = useState<React.CSSProperties>({});
   const toolbarRef = useRef<HTMLDivElement>(null);
 
   const fontSizes = ['12px', '14px', '16px', '18px', '20px', '24px', '28px', '32px'];
@@ -25,10 +26,22 @@ export default function StickyEditorToolbar({
   const textColors = ['#000000', '#FF0000', '#00FF00', '#0000FF', '#FFFF00', '#FF00FF', '#00FFFF', '#FFA500', '#800080', '#FFC0CB'];
 
   useEffect(() => {
+    const updateToolbarPosition = () => {
+      // Get position and width of input fields to match toolbar
+      if (titleRef.current) {
+        const rect = titleRef.current.getBoundingClientRect();
+        setToolbarStyle({
+          left: `${rect.left}px`,
+          width: `${rect.width}px`,
+        });
+      }
+    };
+
     const checkVisibility = () => {
       if (!titleRef.current || !contentRef.current) {
         // Nếu không có title hoặc content, luôn hiển thị khi có active editor
         setIsVisible(!!activeEditorRef.current);
+        updateToolbarPosition();
         return;
       }
 
@@ -40,6 +53,9 @@ export default function StickyEditorToolbar({
       // 2. Content chưa scroll hết (contentRect.bottom > 0)
       const isInRange = titleRect.top <= 100 && contentRect.bottom >= -100;
       setIsVisible(isInRange);
+      
+      // Update toolbar position
+      updateToolbarPosition();
     };
 
     const handleScroll = () => {
@@ -62,11 +78,15 @@ export default function StickyEditorToolbar({
 
     // Check initially
     checkVisibility();
+    updateToolbarPosition();
 
+    // Update on resize
+    window.addEventListener('resize', updateToolbarPosition);
     window.addEventListener('scroll', handleScroll, true);
     document.addEventListener('focusin', handleFocus);
     
     return () => {
+      window.removeEventListener('resize', updateToolbarPosition);
       window.removeEventListener('scroll', handleScroll, true);
       document.removeEventListener('focusin', handleFocus);
     };
@@ -172,15 +192,16 @@ export default function StickyEditorToolbar({
   return (
     <div
       ref={toolbarRef}
-      className="fixed top-0 left-0 right-0 z-50 border-b p-2 flex flex-wrap gap-2 items-center justify-center shadow-md"
+      className="fixed top-0 z-50 border-b shadow-md"
       style={{ 
-        marginLeft: 'auto',
-        marginRight: 'auto',
-        maxWidth: 'calc(100% - 2rem)',
+        ...toolbarStyle,
         backgroundColor: 'oklch(0.98 0.01 260)',
         borderColor: 'oklch(0.3036 0.1223 288)'
       }}
     >
+      <div
+        className="p-2 flex flex-wrap gap-2 items-center justify-center"
+      >
       {/* Font Size */}
       <div className="flex items-center gap-1">
         <label className="text-xs" style={{ color: 'oklch(0.22 0.04 260)' }}>Size:</label>
@@ -387,6 +408,7 @@ export default function StickyEditorToolbar({
       >
         📊 Table
       </button>
+      </div>
     </div>
   );
 }

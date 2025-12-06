@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import PostCard from '../components/PostCard';
 import Pagination from '../components/Pagination';
@@ -37,15 +37,15 @@ export default function HomeFrontend({ initialPosts = [] }: HomeFrontendProps) {
       .catch(() => setPosts([]));
   }, []);
 
-  const handlePinToggle = (postId: string, pinned: boolean) => {
+  const handlePinToggle = useCallback((postId: string, pinned: boolean) => {
     setPosts((prevPosts) =>
       prevPosts.map((post) =>
         post.id === postId ? { ...post, pinned } : post
       )
     );
-  };
+  }, []);
 
-  const handleSelect = (postId: string, selected: boolean) => {
+  const handleSelect = useCallback((postId: string, selected: boolean) => {
     setSelectedPosts((prev) => {
       const newSet = new Set(prev);
       if (selected) {
@@ -55,7 +55,7 @@ export default function HomeFrontend({ initialPosts = [] }: HomeFrontendProps) {
       }
       return newSet;
     });
-  };
+  }, []);
 
   const handleUnselectAll = () => {
     setSelectedPosts(new Set());
@@ -82,62 +82,63 @@ export default function HomeFrontend({ initialPosts = [] }: HomeFrontendProps) {
     }
   };
 
-  const handleEdit = (postId: string) => {
+  const handleEdit = useCallback((postId: string) => {
     router.push(`/admin?edit=${postId}`);
-  };
+  }, [router]);
 
-  const filteredPosts = posts.filter((post) => {
-    const matchesSearch = post.title.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesPinnedFilter = !showPinnedOnly || post.pinned === true;
-    return matchesSearch && matchesPinnedFilter;
-  });
+  // Memoize filtered posts to avoid recalculation on every render
+  const filteredPosts = useMemo(() => {
+    return posts.filter((post) => {
+      const matchesSearch = post.title.toLowerCase().includes(searchQuery.toLowerCase());
+      const matchesPinnedFilter = !showPinnedOnly || post.pinned === true;
+      return matchesSearch && matchesPinnedFilter;
+    });
+  }, [posts, searchQuery, showPinnedOnly]);
 
-  // Sort: pinned posts first, then by date
-  const sortedPosts = [...filteredPosts].sort((a, b) => {
-    if (a.pinned && !b.pinned) return -1;
-    if (!a.pinned && b.pinned) return 1;
-    return new Date(b.date).getTime() - new Date(a.date).getTime();
-  });
+  // Memoize sorted posts
+  const sortedPosts = useMemo(() => {
+    return [...filteredPosts].sort((a, b) => {
+      if (a.pinned && !b.pinned) return -1;
+      if (!a.pinned && b.pinned) return 1;
+      return new Date(b.date).getTime() - new Date(a.date).getTime();
+    });
+  }, [filteredPosts]);
 
-  // Pagination
-  const totalPages = Math.ceil(sortedPosts.length / POSTS_PER_PAGE);
-  const startIndex = (currentPage - 1) * POSTS_PER_PAGE;
-  const endIndex = startIndex + POSTS_PER_PAGE;
-  const paginatedPosts = sortedPosts.slice(startIndex, endIndex);
+  // Memoize pagination calculations
+  const { totalPages, paginatedPosts } = useMemo(() => {
+    const total = Math.ceil(sortedPosts.length / POSTS_PER_PAGE);
+    const startIndex = (currentPage - 1) * POSTS_PER_PAGE;
+    const endIndex = startIndex + POSTS_PER_PAGE;
+    const paginated = sortedPosts.slice(startIndex, endIndex);
+    return { totalPages: total, paginatedPosts: paginated };
+  }, [sortedPosts, currentPage]);
 
   // Reset to page 1 when search or filter changes
   useEffect(() => {
     setCurrentPage(1);
   }, [searchQuery, showPinnedOnly]);
 
+  // Smooth scroll to top when page changes
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, [currentPage]);
+
+  // Memoize page change handler
+  const handlePageChange = useCallback((page: number) => {
+    setCurrentPage(page);
+  }, []);
+
   return (
     <section className="space-y-8">
-      {/* Header Section */}
-      <div className="space-y-6">
-        <div>
-          <h1 
-            className="text-4xl font-bold mb-2"
-            style={{ color: 'oklch(0.22 0.04 260)' }}
-          >
-            Latest Posts
-          </h1>
-          <p 
-            className="text-base"
-            style={{ color: 'oklch(0.5 0.04 260)' }}
-          >
-            Discover our latest articles and insights
-          </p>
-        </div>
-
         {/* Search and Filter Bar */}
-        <div className="flex flex-col sm:flex-row gap-4 items-stretch sm:items-center">
+        <div className="flex flex-col sm:flex-row gap-3 items-stretch sm:items-center">
           <div className="relative flex-1">
             <input
               type="text"
               placeholder="Search by title..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full rounded-xl px-4 py-3 pl-11 border transition-all duration-200 focus:outline-none focus:ring-2 cursor-pointer"
+              className="w-full rounded-lg px-3 py-2 pl-9 text-sm border transition-all duration-200 focus:outline-none focus:ring-2 cursor-pointer"
               style={{
                 borderColor: 'oklch(0.3036 0.1223 288 / 0.3)',
                 color: 'oklch(0.22 0.04 260)',
@@ -153,7 +154,7 @@ export default function HomeFrontend({ initialPosts = [] }: HomeFrontendProps) {
               }}
             />
             <svg
-              className="absolute left-3.5 top-1/2 transform -translate-y-1/2 w-5 h-5 pointer-events-none"
+              className="absolute left-2.5 top-1/2 transform -translate-y-1/2 w-4 h-4 pointer-events-none"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -164,7 +165,7 @@ export default function HomeFrontend({ initialPosts = [] }: HomeFrontendProps) {
           </div>
           <button
             onClick={() => setShowPinnedOnly(!showPinnedOnly)}
-            className="px-5 py-3 rounded-xl border transition-all duration-200 cursor-pointer font-medium flex items-center gap-2 whitespace-nowrap"
+            className="px-4 py-2 rounded-lg border transition-all duration-200 cursor-pointer font-medium flex items-center gap-2 whitespace-nowrap text-sm"
             style={{
               backgroundColor: showPinnedOnly ? 'oklch(0.5638 0.2255 24.24)' : 'white',
               borderColor: showPinnedOnly ? 'oklch(0.5638 0.2255 24.24)' : 'oklch(0.3036 0.1223 288 / 0.3)',
@@ -183,7 +184,7 @@ export default function HomeFrontend({ initialPosts = [] }: HomeFrontendProps) {
               }
             }}
           >
-            <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+            <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
               <path d="M5 4a2 2 0 012-2h6a2 2 0 012 2v14l-5-2.5L5 18V4z" />
             </svg>
             {showPinnedOnly ? 'Showing Pinned' : 'Show Pinned Only'}
@@ -247,10 +248,9 @@ export default function HomeFrontend({ initialPosts = [] }: HomeFrontendProps) {
             </div>
           </div>
         )}
-      </div>
 
       {/* Posts Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
         {paginatedPosts.length > 0 ? (
           paginatedPosts.map((p) => (
             <PostCard 
@@ -298,7 +298,7 @@ export default function HomeFrontend({ initialPosts = [] }: HomeFrontendProps) {
         <Pagination
           currentPage={currentPage}
           totalPages={totalPages}
-          onPageChange={setCurrentPage}
+          onPageChange={handlePageChange}
         />
       )}
     </section>

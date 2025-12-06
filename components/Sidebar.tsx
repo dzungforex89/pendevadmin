@@ -2,7 +2,8 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useSidebar } from '../contexts/SidebarContext';
 
 type NavItem = {
   href: string;
@@ -35,6 +36,22 @@ const navItems: NavItem[] = [
 export default function Sidebar() {
   const pathname = usePathname();
   const [isMobileOpen, setIsMobileOpen] = useState(false);
+  const { isCollapsed, setIsCollapsed } = useSidebar();
+
+  // Save collapsed state to localStorage
+  useEffect(() => {
+    const saved = localStorage.getItem('sidebar-collapsed');
+    if (saved !== null) {
+      setIsCollapsed(JSON.parse(saved));
+    }
+  }, [setIsCollapsed]);
+
+  useEffect(() => {
+    localStorage.setItem('sidebar-collapsed', JSON.stringify(isCollapsed));
+  }, [isCollapsed]);
+
+  const sidebarWidth = isCollapsed ? '80px' : '280px';
+  const isExpanded = !isCollapsed;
 
   return (
     <>
@@ -67,13 +84,13 @@ export default function Sidebar() {
         />
       )}
 
-      {/* Sidebar */}
+      {/* Sidebar - Main (always visible, collapsed or expanded) */}
       <aside
-        className={`fixed top-0 left-0 h-full z-40 transition-transform duration-300 ease-in-out ${
+        className={`fixed top-0 left-0 h-full z-40 transition-all duration-300 ease-in-out ${
           isMobileOpen ? 'translate-x-0' : '-translate-x-full'
         } lg:translate-x-0`}
         style={{
-          width: '280px',
+          width: sidebarWidth,
           backgroundColor: 'oklch(0.98 0.01 260)',
           borderRightColor: 'oklch(0.3036 0.1223 288 / 0.2)',
           borderRightWidth: '1px',
@@ -82,15 +99,60 @@ export default function Sidebar() {
       >
         <div className="flex flex-col h-full">
           {/* Logo Section */}
-          <div className="px-6 py-6 border-b" style={{ borderColor: 'oklch(0.3036 0.1223 288 / 0.2)' }}>
-            <Link
-              href="/"
-              className="text-2xl font-bold transition-opacity duration-200 cursor-pointer hover:opacity-80"
-              style={{ color: 'oklch(0.5638 0.2255 24.24)' }}
-              onClick={() => setIsMobileOpen(false)}
-            >
-              10SAT Console
-            </Link>
+          <div className="px-6 py-6 border-b flex items-center justify-between" style={{ borderColor: 'oklch(0.3036 0.1223 288 / 0.2)' }}>
+            {isExpanded ? (
+              <>
+                <Link
+                  href="/"
+                  className="text-2xl font-bold transition-opacity duration-200 cursor-pointer hover:opacity-80 flex-1"
+                  style={{ color: 'oklch(0.5638 0.2255 24.24)' }}
+                  onClick={() => setIsMobileOpen(false)}
+                >
+                  10SAT Console
+                </Link>
+                <button
+                  onClick={() => setIsCollapsed(!isCollapsed)}
+                  className="p-2 rounded-lg transition-all duration-200 cursor-pointer hover:bg-opacity-80"
+                  style={{
+                    backgroundColor: 'oklch(0.95 0.01 260)',
+                    color: 'oklch(0.22 0.04 260)'
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.backgroundColor = 'oklch(0.90 0.01 260)';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.backgroundColor = 'oklch(0.95 0.01 260)';
+                  }}
+                  aria-label="Collapse sidebar"
+                >
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 19l-7-7 7-7m8 14l-7-7 7-7" />
+                  </svg>
+                </button>
+              </>
+            ) : (
+              <div className="w-full flex justify-center">
+                <button
+                  onClick={() => setIsCollapsed(!isCollapsed)}
+                  className="p-2 rounded-lg transition-all duration-200 cursor-pointer"
+                  style={{
+                    backgroundColor: 'oklch(0.95 0.01 260)',
+                    color: 'oklch(0.22 0.04 260)'
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.backgroundColor = 'oklch(0.90 0.01 260)';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.backgroundColor = 'oklch(0.95 0.01 260)';
+                  }}
+                  aria-label="Expand sidebar"
+                >
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 5l7 7-7 7M5 5l7 7-7 7" />
+                  </svg>
+                </button>
+              </div>
+            )}
           </div>
 
           {/* Navigation Items */}
@@ -103,10 +165,11 @@ export default function Sidebar() {
                   href={item.href}
                   className={`flex items-center gap-3 px-4 py-3 rounded-xl font-medium transition-all duration-200 cursor-pointer ${
                     isActive ? 'shadow-sm' : ''
-                  }`}
+                  } ${isExpanded ? '' : 'justify-center'}`}
                   style={{
                     backgroundColor: isActive ? 'oklch(0.5638 0.2255 24.24)' : 'transparent',
                     color: isActive ? 'white' : 'oklch(0.22 0.04 260)',
+                    minWidth: isExpanded ? 'auto' : '48px',
                   }}
                   onMouseEnter={(e) => {
                     if (!isActive) {
@@ -119,42 +182,45 @@ export default function Sidebar() {
                     }
                   }}
                   onClick={() => setIsMobileOpen(false)}
+                  title={!isExpanded ? item.label : undefined}
                 >
                   <span className="flex-shrink-0">{item.icon}</span>
-                  <span>{item.label}</span>
+                  {isExpanded && <span className="truncate">{item.label}</span>}
                 </Link>
               );
             })}
           </nav>
 
           {/* Footer Section */}
-          <div className="px-4 py-6 border-t" style={{ borderColor: 'oklch(0.3036 0.1223 288 / 0.2)' }}>
-            <div className="flex items-center gap-3 mb-3">
-              <div
-                className="w-10 h-10 rounded-lg flex items-center justify-center font-semibold"
-                style={{
-                  backgroundColor: 'oklch(0.5638 0.2255 24.24 / 0.1)',
-                  color: 'oklch(0.5638 0.2255 24.24)'
-                }}
-              >
-                PA
+          {isExpanded && (
+            <div className="px-4 py-6 border-t" style={{ borderColor: 'oklch(0.3036 0.1223 288 / 0.2)' }}>
+              <div className="flex items-center gap-3 mb-3">
+                <div
+                  className="w-10 h-10 rounded-lg flex items-center justify-center font-semibold flex-shrink-0"
+                  style={{
+                    backgroundColor: 'oklch(0.5638 0.2255 24.24 / 0.1)',
+                    color: 'oklch(0.5638 0.2255 24.24)'
+                  }}
+                >
+                  PA
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium truncate" style={{ color: 'oklch(0.22 0.04 260)' }}>
+                    Pencil Ai
+                  </p>
+                  <p className="text-xs truncate" style={{ color: 'oklch(0.5 0.04 260)' }}>
+                    ADMIN
+                  </p>
+                </div>
               </div>
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium truncate" style={{ color: 'oklch(0.22 0.04 260)' }}>
-                  Pencil Ai
-                </p>
-                <p className="text-xs truncate" style={{ color: 'oklch(0.5 0.04 260)' }}>
-                  ADMIN
-                </p>
-              </div>
+              <p className="text-xs truncate" style={{ color: 'oklch(0.5 0.04 260)' }}>
+                aipencilclass@gmail.com
+              </p>
             </div>
-            <p className="text-xs" style={{ color: 'oklch(0.5 0.04 260)' }}>
-              aipencilclass@gmail.com
-            </p>
-          </div>
+          )}
         </div>
       </aside>
+
     </>
   );
 }
-

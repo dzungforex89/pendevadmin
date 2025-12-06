@@ -38,25 +38,57 @@ app.prepare().then(async () => {
         return res.status(503).json({ error: 'Database not connected', posts: [] });
       }
       const posts = await prisma.post.findMany({
-        orderBy: { date: 'desc' }
+        orderBy: [
+          { pinned: 'desc' },
+          { date: 'desc' }
+        ]
       });
       res.json(posts);
     } catch (err: any) {
       // eslint-disable-next-line no-console
       console.error('GET /api/posts error:', err);
-      res.status(500).json({ error: 'Could not load posts' });
+      
+      // Handle enum type mismatch - try raw query to convert enum strings
+      if (err.code === 'P2032' && err.meta?.field === 'topic') {
+        try {
+          const rawPosts = await prisma.$queryRaw`
+            SELECT id, title, slug, excerpt, content, date, "createdAt", "updatedAt", 
+                   "fontSize", thumbnail, pinned,
+                   CASE 
+                     WHEN topic::text IN ('TECHNOLOGY', 'HEALTH', 'LIFESTYLE', 'EDUCATION', 'ENTERTAINMENT') 
+                     THEN topic::text
+                     ELSE NULL
+                   END as topic
+            FROM post
+            ORDER BY pinned DESC, date DESC
+          `;
+          res.json(rawPosts);
+          return;
+        } catch (rawErr: any) {
+          // eslint-disable-next-line no-console
+          console.error('Raw query also failed:', rawErr);
+        }
+      }
+      
+      res.status(500).json({ error: 'Could not load posts', posts: [] });
     }
   });
 
-  // Get post by slug
+  // Get post by slug or id
   server.get('/api/posts/:slug', async (req, res) => {
     try {
       if (!dbConnected) {
         return res.status(503).json({ error: 'Database not connected' });
       }
-      const post = await prisma.post.findUnique({
+      // Try to find by slug first, then by id
+      let post = await prisma.post.findUnique({
         where: { slug: req.params.slug }
       });
+      if (!post) {
+        post = await prisma.post.findUnique({
+          where: { id: req.params.slug }
+        });
+      }
       if (!post) return res.status(404).json({ error: 'Not found' });
       res.json(post);
     } catch (err: any) {
@@ -66,25 +98,155 @@ app.prepare().then(async () => {
     }
   });
 
+  // Search posts by title (for autocomplete)
+  // Flow: Frontend -> Debounce -> API Call -> Prisma Query -> Response
+  server.get('/api/posts/search', async (req, res) => {
+    try {
+      if (!dbConnected) {
+        return res.status(503).json({ error: 'Database not connected' });
+      }
+      
+      // Step 1: Get query parameter
+      const query = req.query.q as string;
+      if (!query || query.trim().length === 0) {
+        return res.json([]);
+      }
+      
+      const searchQuery = query.trim();
+      
+      // Step 2: Prisma query - Find posts with title containing the keyword
+      const posts = await prisma.post.findMany({
+        where: {
+          title: {
+            contains: searchQuery,
+            mode: 'insensitive' // Case-insensitive search
+          }
+        },
+        take: 10, // Limit to 10 results
+        orderBy: { date: 'desc' }, // Latest first
+        select: {
+          id: true,
+          title: true,
+          slug: true,
+          excerpt: true,
+          thumbnail: true
+        }
+      });
+      
+      // Step 3: Return response (ID, Title, Thumbnail, Slug, Excerpt)
+      res.json(posts);
+    } catch (err: any) {
+      // eslint-disable-next-line no-console
+      console.error('GET /api/posts/search error:', err);
+      res.status(500).json({ error: 'Could not search posts' });
+    }
+  });
+
+  // Get related posts (3 posts excluding current)
+  server.get('/api/posts/:slug/related', async (req, res) => {
+    try {
+      if (!dbConnected) {
+        return res.status(503).json({ error: 'Database not connected', posts: [] });
+      }
+      const currentPost = await prisma.post.findUnique({
+        where: { slug: req.params.slug },
+        select: { topic: true }
+      });
+      
+      // Try to get posts with same topic first, then fallback to latest posts
+      let relatedPosts;
+      if (currentPost?.topic) {
+        relatedPosts = await prisma.post.findMany({
+          where: {
+            slug: { not: req.params.slug },
+            topic: currentPost.topic
+          },
+          orderBy: [
+            { pinned: 'desc' },
+            { date: 'desc' }
+          ],
+          take: 3
+        });
+      }
+      
+      // If not enough posts with same topic, fill with latest posts
+      if (!relatedPosts || relatedPosts.length < 3) {
+        const additionalPosts = await prisma.post.findMany({
+          where: {
+            slug: { not: req.params.slug },
+            ...(currentPost?.topic ? { topic: { not: currentPost.topic } } : {})
+          },
+          orderBy: [
+            { pinned: 'desc' },
+            { date: 'desc' }
+          ],
+          take: 3 - (relatedPosts?.length || 0)
+        });
+        relatedPosts = [...(relatedPosts || []), ...additionalPosts].slice(0, 3);
+      }
+      
+      res.json(relatedPosts || []);
+    } catch (err: any) {
+      // eslint-disable-next-line no-console
+      console.error('GET /api/posts/:slug/related error:', err);
+      res.status(500).json({ error: 'Could not load related posts', posts: [] });
+    }
+  });
+
   // Create a post
   server.post('/api/posts', async (req, res) => {
     try {
       if (!dbConnected) {
         return res.status(503).json({ error: 'Database not connected' });
       }
-      const { title, slug, topic, excerpt, content, thumbnail, pinned, fontSize } = req.body;
+      const { title, slug, topic, excerpt, content, thumbnail, pinned, fontSize, relatedArticles } = req.body;
       if (!title || !slug) return res.status(400).json({ error: 'title and slug required' });
+      
+      // Validate and convert topic if provided
+      // Support both enum values and numeric values (1-5) for backward compatibility
+      const validTopics = ['TECHNOLOGY', 'HEALTH', 'LIFESTYLE', 'EDUCATION', 'ENTERTAINMENT'];
+      const topicEnumMap: { [key: number]: string } = {
+        1: 'TECHNOLOGY',
+        2: 'HEALTH',
+        3: 'LIFESTYLE',
+        4: 'EDUCATION',
+        5: 'ENTERTAINMENT'
+      };
+      
+      let topicValue: string | null = null;
+      if (topic) {
+        if (typeof topic === 'number' || (typeof topic === 'string' && /^\d+$/.test(topic))) {
+          // Numeric topic (1-5) - convert to enum
+          const numTopic = typeof topic === 'number' ? topic : parseInt(topic);
+          topicValue = (numTopic >= 1 && numTopic <= 5) ? topicEnumMap[numTopic] : null;
+        } else if (typeof topic === 'string' && validTopics.includes(topic)) {
+          // Already an enum value
+          topicValue = topic;
+        }
+      }
+
+      // Validate relatedArticles - should be array of strings (post IDs) or null
+      let relatedArticlesValue: any = null;
+      if (relatedArticles !== undefined && relatedArticles !== null) {
+        if (Array.isArray(relatedArticles) && relatedArticles.length > 0) {
+          // Validate that all items are strings
+          if (relatedArticles.every((id: any) => typeof id === 'string')) {
+            relatedArticlesValue = relatedArticles;
+          }
+        }
+      }
       
       const post = await prisma.post.create({
         data: {
           title,
           slug,
-          topic: topic ? parseInt(topic) : null,
+          topic: topicValue as any,
           excerpt: excerpt || '',
           content: content || '',
           thumbnail: thumbnail || null,
           pinned: pinned || false,
-          fontSize: fontSize || '16px'
+          fontSize: fontSize || '16px',
+          relatedArticles: relatedArticlesValue
         }
       });
       res.status(201).json(post);
@@ -104,15 +266,52 @@ app.prepare().then(async () => {
       if (!dbConnected) {
         return res.status(503).json({ error: 'Database not connected' });
       }
-      const { title, topic, excerpt, content, thumbnail, pinned, fontSize } = req.body;
+      const { title, topic, excerpt, content, thumbnail, pinned, fontSize, relatedArticles } = req.body;
       const updateData: any = {};
       if (title !== undefined) updateData.title = title;
-      if (topic !== undefined) updateData.topic = topic ? parseInt(topic) : null;
+      if (topic !== undefined) {
+        // Validate and convert topic if provided
+        // Support both enum values and numeric values (1-5) for backward compatibility
+        const validTopics = ['TECHNOLOGY', 'HEALTH', 'LIFESTYLE', 'EDUCATION', 'ENTERTAINMENT'];
+        const topicEnumMap: { [key: number]: string } = {
+          1: 'TECHNOLOGY',
+          2: 'HEALTH',
+          3: 'LIFESTYLE',
+          4: 'EDUCATION',
+          5: 'ENTERTAINMENT'
+        };
+        
+        let topicValue: string | null = null;
+        if (topic) {
+          if (typeof topic === 'number' || (typeof topic === 'string' && /^\d+$/.test(topic))) {
+            // Numeric topic (1-5) - convert to enum
+            const numTopic = typeof topic === 'number' ? topic : parseInt(topic);
+            topicValue = (numTopic >= 1 && numTopic <= 5) ? topicEnumMap[numTopic] : null;
+          } else if (typeof topic === 'string' && validTopics.includes(topic)) {
+            // Already an enum value
+            topicValue = topic;
+          }
+        }
+        updateData.topic = topicValue as any;
+      }
       if (excerpt !== undefined) updateData.excerpt = excerpt;
       if (content !== undefined) updateData.content = content;
       if (thumbnail !== undefined) updateData.thumbnail = thumbnail;
       if (pinned !== undefined) updateData.pinned = pinned;
       if (fontSize !== undefined) updateData.fontSize = fontSize;
+      if (relatedArticles !== undefined) {
+        // Validate relatedArticles - should be array of strings (post IDs) or null
+        if (relatedArticles === null) {
+          updateData.relatedArticles = null;
+        } else if (Array.isArray(relatedArticles) && relatedArticles.length > 0) {
+          // Validate that all items are strings
+          if (relatedArticles.every((id: any) => typeof id === 'string')) {
+            updateData.relatedArticles = relatedArticles;
+          }
+        } else if (Array.isArray(relatedArticles) && relatedArticles.length === 0) {
+          updateData.relatedArticles = null;
+        }
+      }
       
       const post = await prisma.post.update({
         where: { id: req.params.id },

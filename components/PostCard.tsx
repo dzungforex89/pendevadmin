@@ -23,7 +23,7 @@ type PostCardProps = {
   onEdit?: (postId: string) => void;
 };
 
-export default function PostCard({ post, onPinToggle, isSelected = false, onSelect, onEdit }: PostCardProps) {
+function PostCardComponent({ post, onPinToggle, isSelected = false, onSelect, onEdit }: PostCardProps) {
   const router = useRouter();
   const [showMenu, setShowMenu] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
@@ -95,9 +95,23 @@ export default function PostCard({ post, onPinToggle, isSelected = false, onSele
 
   // Strip HTML tags for excerpt display
   const stripHtml = (html: string) => {
+    if (typeof document === 'undefined') {
+      // Server-side: use regex to strip HTML tags
+      return html.replace(/<[^>]*>/g, '').replace(/&nbsp;/g, ' ').trim();
+    }
+    // Client-side: use DOM method for better accuracy
     const tmp = document.createElement('DIV');
     tmp.innerHTML = html;
-    return tmp.textContent || tmp.innerText || '';
+    const text = tmp.textContent || tmp.innerText || '';
+    return text.trim(); // Ensure consistent trimming on both server and client
+  };
+
+  // Limit excerpt to approximately 100 words
+  const limitExcerpt = (text: string, maxWords: number = 100) => {
+    const trimmedText = text.trim();
+    const words = trimmedText.split(/\s+/).filter(word => word.length > 0);
+    if (words.length <= maxWords) return trimmedText;
+    return words.slice(0, maxWords).join(' ') + '...';
   };
 
   return (
@@ -115,7 +129,7 @@ export default function PostCard({ post, onPinToggle, isSelected = false, onSele
             boxShadow: isSelected ? '0 4px 12px oklch(0.5638 0.2255 24.24 / 0.2)' : '0 1px 3px oklch(0.22 0.04 260 / 0.1)',
           }}
         >
-          <div className="relative w-full h-48 bg-gray-100 overflow-hidden">
+          <div className="relative w-full h-36 bg-gray-100 overflow-hidden">
             <img 
               src={thumbnailSrc} 
               alt={post.title}
@@ -137,20 +151,20 @@ export default function PostCard({ post, onPinToggle, isSelected = false, onSele
               </div>
             )}
           </div>
-          <div className="p-5 flex-1 flex flex-col">
+          <div className="p-3 flex-1 flex flex-col">
             <h3 
-              className="text-lg font-semibold mb-2 line-clamp-2 transition-colors duration-200"
+              className="text-base font-semibold mb-1.5 line-clamp-2 transition-colors duration-200"
               style={{ color: 'oklch(0.22 0.04 260)' }}
             >
               {stripHtml(post.title)}
             </h3>
             <p 
-              className="text-sm line-clamp-3 flex-1" 
+              className="text-xs line-clamp-3 flex-1" 
               style={{ color: 'oklch(0.45 0.04 260)' }}
             >
-              {stripHtml(post.excerpt)}
+              {limitExcerpt(stripHtml(post.excerpt), 80)}
             </p>
-            <div className="mt-3 text-xs" style={{ color: 'oklch(0.5 0.04 260)' }}>
+            <div className="mt-1.5 text-xs" style={{ color: 'oklch(0.5 0.04 260)', fontSize: '0.65rem' }}>
               {new Date(post.date).toLocaleDateString('vi-VN', { 
                 year: 'numeric', 
                 month: 'long', 
@@ -282,3 +296,7 @@ export default function PostCard({ post, onPinToggle, isSelected = false, onSele
     </div>
   );
 }
+
+const PostCard = React.memo(PostCardComponent);
+
+export default PostCard;
