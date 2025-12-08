@@ -329,9 +329,9 @@ export default function AdminFrontend({ initialPosts = [] }: AdminFrontendProps)
             style={{ color: 'oklch(0.22 0.04 260)' }}
           >
             <option value="">Select topic...</option>
-            <option value="A">A</option>
-            <option value="B">B</option>
-            <option value="C">C</option>
+            <option value="kien_thuc">Kiến thức</option>
+            <option value="thu_tuc">Thủ tục</option>
+            <option value="thong_tin">Thông tin</option>
           </select>
         </div>
         <div>

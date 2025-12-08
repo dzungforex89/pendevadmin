@@ -28,9 +28,7 @@ model Post {
 }
 
 enum Topic {
-  TECHNOLOGY
-  HEALTH
-  LIFESTYLE
-  EDUCATION
-  ENTERTAINMENT
+  kien_thuc
+  thu_tuc
+  thong_tin
 }

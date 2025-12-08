@@ -54,11 +54,11 @@ app.prepare().then(async () => {
           const rawPosts = await prisma.$queryRaw`
             SELECT id, title, slug, excerpt, content, date, "createdAt", "updatedAt", 
                    "fontSize", thumbnail, pinned,
-                   CASE 
-                     WHEN topic::text IN ('TECHNOLOGY', 'HEALTH', 'LIFESTYLE', 'EDUCATION', 'ENTERTAINMENT') 
-                     THEN topic::text
-                     ELSE NULL
-                   END as topic
+                  CASE 
+                    WHEN topic::text IN ('kien_thuc', 'thu_tuc', 'thong_tin') 
+                    THEN topic::text
+                    ELSE NULL
+                  END as topic
             FROM post
             ORDER BY pinned DESC, date DESC
           `;
@@ -148,44 +148,83 @@ app.prepare().then(async () => {
       if (!dbConnected) {
         return res.status(503).json({ error: 'Database not connected', posts: [] });
       }
+      
+      // Get current post with relatedArticles
       const currentPost = await prisma.post.findUnique({
         where: { slug: req.params.slug },
-        select: { topic: true }
+        select: { 
+          id: true,
+          topic: true,
+          relatedArticles: true 
+        }
       });
       
-      // Try to get posts with same topic first, then fallback to latest posts
-      let relatedPosts;
-      if (currentPost?.topic) {
-        relatedPosts = await prisma.post.findMany({
+      if (!currentPost) {
+        return res.json([]);
+      }
+      
+      let relatedPosts: any[] = [];
+      
+      // Priority 1: Use relatedArticles from database (admin selected)
+      if (currentPost.relatedArticles && Array.isArray(currentPost.relatedArticles)) {
+        const relatedIds = currentPost.relatedArticles as string[];
+        if (relatedIds.length > 0) {
+          // Fetch posts by IDs from relatedArticles
+          relatedPosts = await prisma.post.findMany({
+            where: {
+              id: { in: relatedIds },
+              slug: { not: req.params.slug } // Exclude current post
+            },
+            orderBy: [
+              { pinned: 'desc' },
+              { date: 'desc' }
+            ]
+          });
+          
+          // Sort to maintain the order from relatedArticles array
+          const sortedRelatedPosts = relatedIds
+            .map(id => relatedPosts.find(p => p.id === id))
+            .filter((p): p is any => p !== undefined);
+          
+          relatedPosts = sortedRelatedPosts;
+        }
+      }
+      
+      // Priority 2: If not enough posts (less than 3), fill with same topic posts
+      if (relatedPosts.length < 3 && currentPost.topic) {
+        const sameTopicPosts = await prisma.post.findMany({
           where: {
             slug: { not: req.params.slug },
-            topic: currentPost.topic
+            topic: currentPost.topic,
+            id: { notIn: relatedPosts.map(p => p.id) } // Exclude already selected posts
           },
           orderBy: [
             { pinned: 'desc' },
             { date: 'desc' }
           ],
-          take: 3
+          take: 3 - relatedPosts.length
         });
+        relatedPosts = [...relatedPosts, ...sameTopicPosts].slice(0, 3);
       }
       
-      // If not enough posts with same topic, fill with latest posts
-      if (!relatedPosts || relatedPosts.length < 3) {
-        const additionalPosts = await prisma.post.findMany({
+      // Priority 3: If still not enough, fill with latest posts
+      if (relatedPosts.length < 3) {
+        const latestPosts = await prisma.post.findMany({
           where: {
             slug: { not: req.params.slug },
-            ...(currentPost?.topic ? { topic: { not: currentPost.topic } } : {})
+            id: { notIn: relatedPosts.map(p => p.id) }, // Exclude already selected posts
+            ...(currentPost.topic ? { topic: { not: currentPost.topic } } : {})
           },
           orderBy: [
             { pinned: 'desc' },
             { date: 'desc' }
           ],
-          take: 3 - (relatedPosts?.length || 0)
+          take: 3 - relatedPosts.length
         });
-        relatedPosts = [...(relatedPosts || []), ...additionalPosts].slice(0, 3);
+        relatedPosts = [...relatedPosts, ...latestPosts].slice(0, 3);
       }
       
-      res.json(relatedPosts || []);
+      res.json(relatedPosts);
     } catch (err: any) {
       // eslint-disable-next-line no-console
       console.error('GET /api/posts/:slug/related error:', err);
@@ -202,26 +241,17 @@ app.prepare().then(async () => {
       const { title, slug, topic, excerpt, content, thumbnail, pinned, fontSize, relatedArticles } = req.body;
       if (!title || !slug) return res.status(400).json({ error: 'title and slug required' });
       
-      // Validate and convert topic if provided
-      // Support both enum values and numeric values (1-5) for backward compatibility
-      const validTopics = ['TECHNOLOGY', 'HEALTH', 'LIFESTYLE', 'EDUCATION', 'ENTERTAINMENT'];
-      const topicEnumMap: { [key: number]: string } = {
-        1: 'TECHNOLOGY',
-        2: 'HEALTH',
-        3: 'LIFESTYLE',
-        4: 'EDUCATION',
-        5: 'ENTERTAINMENT'
-      };
+      // Validate topic if provided
+      const validTopics = ['kien_thuc', 'thu_tuc', 'thong_tin'];
       
       let topicValue: string | null = null;
       if (topic) {
-        if (typeof topic === 'number' || (typeof topic === 'string' && /^\d+$/.test(topic))) {
-          // Numeric topic (1-5) - convert to enum
-          const numTopic = typeof topic === 'number' ? topic : parseInt(topic);
-          topicValue = (numTopic >= 1 && numTopic <= 5) ? topicEnumMap[numTopic] : null;
-        } else if (typeof topic === 'string' && validTopics.includes(topic)) {
-          // Already an enum value
+        if (typeof topic === 'string' && validTopics.includes(topic)) {
+          // Valid topic enum value
           topicValue = topic;
+        } else {
+          // Invalid topic - set to null
+          topicValue = null;
         }
       }
 
@@ -270,26 +300,17 @@ app.prepare().then(async () => {
       const updateData: any = {};
       if (title !== undefined) updateData.title = title;
       if (topic !== undefined) {
-        // Validate and convert topic if provided
-        // Support both enum values and numeric values (1-5) for backward compatibility
-        const validTopics = ['TECHNOLOGY', 'HEALTH', 'LIFESTYLE', 'EDUCATION', 'ENTERTAINMENT'];
-        const topicEnumMap: { [key: number]: string } = {
-          1: 'TECHNOLOGY',
-          2: 'HEALTH',
-          3: 'LIFESTYLE',
-          4: 'EDUCATION',
-          5: 'ENTERTAINMENT'
-        };
+        // Validate topic if provided
+        const validTopics = ['kien_thuc', 'thu_tuc', 'thong_tin'];
         
         let topicValue: string | null = null;
         if (topic) {
-          if (typeof topic === 'number' || (typeof topic === 'string' && /^\d+$/.test(topic))) {
-            // Numeric topic (1-5) - convert to enum
-            const numTopic = typeof topic === 'number' ? topic : parseInt(topic);
-            topicValue = (numTopic >= 1 && numTopic <= 5) ? topicEnumMap[numTopic] : null;
-          } else if (typeof topic === 'string' && validTopics.includes(topic)) {
-            // Already an enum value
+          if (typeof topic === 'string' && validTopics.includes(topic)) {
+            // Valid topic enum value
             topicValue = topic;
+          } else {
+            // Invalid topic - set to null
+            topicValue = null;
           }
         }
         updateData.topic = topicValue as any;
