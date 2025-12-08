@@ -38,24 +38,22 @@ export default function StickyEditorToolbar({
     };
 
     const checkVisibility = () => {
-      if (!titleRef.current || !contentRef.current) {
-        // Nếu không có title hoặc content, luôn hiển thị khi có active editor
-        setIsVisible(!!activeEditorRef.current);
-        updateToolbarPosition();
-        return;
-      }
+      // Check if focus is within one of the editable fields
+      const activeElement = document.activeElement;
+      const isFocusedOnEditableField = !!(activeElement && (
+        activeElement === titleRef.current ||
+        activeElement === excerptRef.current ||
+        activeElement === contentRef.current ||
+        titleRef.current?.contains(activeElement) ||
+        excerptRef.current?.contains(activeElement) ||
+        contentRef.current?.contains(activeElement)
+      ));
 
-      const titleRect = titleRef.current.getBoundingClientRect();
-      const contentRect = contentRef.current.getBoundingClientRect();
+      setIsVisible(isFocusedOnEditableField);
       
-      // Hiển thị toolbar khi:
-      // 1. Title đã scroll qua top (titleRect.top < 0)
-      // 2. Content chưa scroll hết (contentRect.bottom > 0)
-      const isInRange = titleRect.top <= 100 && contentRect.bottom >= -100;
-      setIsVisible(isInRange);
-      
-      // Update toolbar position
-      updateToolbarPosition();
+      if (isFocusedOnEditableField) {
+        updateToolbarPosition();
+      }
     };
 
     const handleScroll = () => {
@@ -63,32 +61,31 @@ export default function StickyEditorToolbar({
     };
 
     const handleFocus = (e: FocusEvent) => {
-      const target = e.target as HTMLElement;
-      if (target && (
-        target === titleRef.current ||
-        target === excerptRef.current ||
-        target === contentRef.current ||
-        titleRef.current?.contains(target) ||
-        excerptRef.current?.contains(target) ||
-        contentRef.current?.contains(target)
-      )) {
+      checkVisibility();
+    };
+
+    const handleBlur = (e: FocusEvent) => {
+      // Delay to check if focus moved to toolbar or another editable field
+      setTimeout(() => {
         checkVisibility();
-      }
+      }, 100);
     };
 
     // Check initially
     checkVisibility();
     updateToolbarPosition();
 
-    // Update on resize
+    // Update on resize, scroll, focus and blur
     window.addEventListener('resize', updateToolbarPosition);
     window.addEventListener('scroll', handleScroll, true);
     document.addEventListener('focusin', handleFocus);
+    document.addEventListener('focusout', handleBlur);
     
     return () => {
       window.removeEventListener('resize', updateToolbarPosition);
       window.removeEventListener('scroll', handleScroll, true);
       document.removeEventListener('focusin', handleFocus);
+      document.removeEventListener('focusout', handleBlur);
     };
   }, [activeEditorRef, titleRef, excerptRef, contentRef]);
 
@@ -192,7 +189,7 @@ export default function StickyEditorToolbar({
   return (
     <div
       ref={toolbarRef}
-      className="fixed top-0 z-50 border-b shadow-md"
+      className="sticky top-0 z-50 flex-1"
       style={{ 
         ...toolbarStyle,
         backgroundColor: 'oklch(0.98 0.01 260)',
@@ -200,7 +197,7 @@ export default function StickyEditorToolbar({
       }}
     >
       <div
-        className="p-2 flex flex-wrap gap-2 items-center justify-center"
+        className="flex flex-wrap gap-2 items-center justify-center"
       >
       {/* Font Size */}
       <div className="flex items-center gap-1">

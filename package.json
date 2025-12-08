@@ -5,7 +5,7 @@
   "scripts": {
     "dev:next": "next dev",
     "dev:server": "tsx watch server/index.ts",
-    "dev": "npm run dev:server --port 3002",
+    "dev": "npm run dev:server",
     "build": "next build",
     "start": "node server/dist/index.js",
     "lint": "next lint",
