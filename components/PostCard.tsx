@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useMemo } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { DEFAULT_THUMBNAIL_BASE64 } from '../constants/defaultThumbnail';
@@ -23,12 +23,41 @@ type PostCardProps = {
   onEdit?: (postId: string) => void;
 };
 
+// Strip HTML tags - optimized version
+function stripHtml(html: string): string {
+  if (typeof document === 'undefined') {
+    // Server-side: use regex
+    return html.replace(/<[^>]*>/g, '').replace(/&nbsp;/g, ' ').trim();
+  }
+  // Client-side: use regex for better performance (avoid DOM creation)
+  return html.replace(/<[^>]*>/g, '').replace(/&nbsp;/g, ' ').trim();
+}
+
+// Limit excerpt to approximately 100 words
+function limitExcerpt(text: string, maxWords: number = 100): string {
+  const trimmedText = text.trim();
+  const words = trimmedText.split(/\s+/).filter(word => word.length > 0);
+  if (words.length <= maxWords) return trimmedText;
+  return words.slice(0, maxWords).join(' ') + '...';
+}
+
 function PostCardComponent({ post, onPinToggle, isSelected = false, onSelect, onEdit }: PostCardProps) {
   const router = useRouter();
   const [showMenu, setShowMenu] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
   const thumbnailSrc = post.thumbnail || DEFAULT_THUMBNAIL_BASE64;
+  
+  // Memoize computed values to avoid recalculation on every render
+  const cleanTitle = useMemo(() => stripHtml(post.title), [post.title]);
+  const cleanExcerpt = useMemo(() => limitExcerpt(stripHtml(post.excerpt), 80), [post.excerpt]);
+  const formattedDate = useMemo(() => {
+    return new Date(post.date).toLocaleDateString('vi-VN', { 
+      year: 'numeric', 
+      month: 'long', 
+      day: 'numeric' 
+    });
+  }, [post.date]);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -93,34 +122,13 @@ function PostCardComponent({ post, onPinToggle, isSelected = false, onSelect, on
     setShowMenu(false);
   };
 
-  // Strip HTML tags for excerpt display
-  const stripHtml = (html: string) => {
-    if (typeof document === 'undefined') {
-      // Server-side: use regex to strip HTML tags
-      return html.replace(/<[^>]*>/g, '').replace(/&nbsp;/g, ' ').trim();
-    }
-    // Client-side: use DOM method for better accuracy
-    const tmp = document.createElement('DIV');
-    tmp.innerHTML = html;
-    const text = tmp.textContent || tmp.innerText || '';
-    return text.trim(); // Ensure consistent trimming on both server and client
-  };
-
-  // Limit excerpt to approximately 100 words
-  const limitExcerpt = (text: string, maxWords: number = 100) => {
-    const trimmedText = text.trim();
-    const words = trimmedText.split(/\s+/).filter(word => word.length > 0);
-    if (words.length <= maxWords) return trimmedText;
-    return words.slice(0, maxWords).join(' ') + '...';
-  };
-
   return (
     <div 
       className="relative group"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
-      <Link href={`/posts/${post.slug}`} className="block cursor-pointer">
+      <Link href={`/posts/${post.slug}`} className="block cursor-pointer" prefetch={true}>
         <article 
           className="rounded-xl overflow-hidden bg-white border transition-all duration-200 h-full flex flex-col hover:shadow-lg"
           style={{
@@ -132,7 +140,8 @@ function PostCardComponent({ post, onPinToggle, isSelected = false, onSelect, on
           <div className="relative w-full h-36 bg-gray-100 overflow-hidden">
             <img 
               src={thumbnailSrc} 
-              alt={post.title}
+              alt={cleanTitle}
+              loading="lazy"
               className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
             />
             {post.pinned && (
@@ -156,20 +165,16 @@ function PostCardComponent({ post, onPinToggle, isSelected = false, onSelect, on
               className="text-base font-semibold mb-1.5 line-clamp-2 transition-colors duration-200"
               style={{ color: 'oklch(0.22 0.04 260)' }}
             >
-              {stripHtml(post.title)}
+              {cleanTitle}
             </h3>
             <p 
               className="text-xs line-clamp-3 flex-1" 
               style={{ color: 'oklch(0.45 0.04 260)' }}
             >
-              {limitExcerpt(stripHtml(post.excerpt), 80)}
+              {cleanExcerpt}
             </p>
             <div className="mt-1.5 text-xs" style={{ color: 'oklch(0.5 0.04 260)', fontSize: '0.65rem' }}>
-              {new Date(post.date).toLocaleDateString('vi-VN', { 
-                year: 'numeric', 
-                month: 'long', 
-                day: 'numeric' 
-              })}
+              {formattedDate}
             </div>
           </div>
         </article>

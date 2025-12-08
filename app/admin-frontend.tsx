@@ -513,8 +513,8 @@ export default function AdminFrontend({ initialPosts = [] }: AdminFrontendProps)
       {/* Edit Modal */}
       {editingId && editingPost && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 overflow-y-auto">
-          <div className="bg-white rounded-lg shadow-lg w-full max-w-6xl my-8 flex flex-col p-6" style={{ backgroundColor: 'oklch(0.98 0.01 260)' }}>
-            <h2 className="text-xl font-semibold mb-4 admin-text">Edit Post</h2>
+          <div className="bg-white rounded-lg shadow-lg w-full max-w-4xl max-h-[90vh] my-4 flex flex-col p-4 overflow-hidden" style={{ backgroundColor: 'oklch(0.98 0.01 260)' }}>
+            <h2 className="text-lg font-semibold mb-3 admin-text">Edit Post</h2>
             
             <StickyEditorToolbar
               activeEditorRef={editActiveEditorRef}
@@ -523,25 +523,25 @@ export default function AdminFrontend({ initialPosts = [] }: AdminFrontendProps)
               contentRef={editContentRef}
             />
             
-            <div className="space-y-4 flex-1">
+            <div className="space-y-3 flex-1 overflow-y-auto pr-2">
               <div>
-                <label className="block text-sm mb-2 admin-text font-medium">Title</label>
+                <label className="block text-sm mb-1.5 admin-text font-medium">Title</label>
                 <div
                   ref={editTitleRef}
                   contentEditable
                   onFocus={() => setEditActiveEditorRef(editTitleRef)}
-                  className="w-full admin-input border-2 px-2 py-1 font-semibold text-2xl rounded"
+                  className="w-full admin-input border-2 px-2 py-1 font-semibold text-xl rounded"
                   style={{ color: 'oklch(0.22 0.04 260)' }}
                 />
               </div>
               
               <div>
-                <label className="block text-sm mb-2 admin-text font-medium">Excerpt</label>
+                <label className="block text-sm mb-1.5 admin-text font-medium">Excerpt</label>
                 <div
                   ref={editExcerptRef}
                   contentEditable
                   onFocus={() => setEditActiveEditorRef(editExcerptRef)}
-                  className="w-full min-h-[80px] admin-input border-2 px-3 py-2 prose rounded"
+                  className="w-full min-h-[60px] admin-input border-2 px-2 py-1.5 prose rounded text-sm"
                   style={{ color: 'oklch(0.22 0.04 260)' }}
                 />
               </div>
@@ -551,13 +551,13 @@ export default function AdminFrontend({ initialPosts = [] }: AdminFrontendProps)
               </div>
               
               <div>
-                <label className="block text-sm mb-2 admin-text font-medium">Content</label>
+                <label className="block text-sm mb-1.5 admin-text font-medium">Content</label>
                 <div
                   ref={editContentRef}
                   contentEditable
                   onKeyDown={handleContentKeyDown}
                   onFocus={() => setEditActiveEditorRef(editContentRef)}
-                  className="w-full min-h-[300px] admin-input border-2 px-3 py-2 prose rounded"
+                  className="w-full min-h-[200px] admin-input border-2 px-2 py-1.5 prose rounded text-sm"
                   style={{ color: 'oklch(0.22 0.04 260)' }}
                 />
               </div>
@@ -572,11 +572,11 @@ export default function AdminFrontend({ initialPosts = [] }: AdminFrontendProps)
               </div>
             </div>
 
-            <div className="flex gap-2 justify-end mt-4 border-t admin-border pt-4">
+            <div className="flex gap-2 justify-end mt-3 border-t admin-border pt-3 flex-shrink-0">
               <button 
                 type="button" 
                 onClick={cancelEdit} 
-                className="px-4 py-2 admin-secondary rounded transition-colors"
+                className="px-3 py-1.5 text-sm admin-secondary rounded transition-colors"
               >
                 Cancel
               </button>
@@ -584,7 +584,7 @@ export default function AdminFrontend({ initialPosts = [] }: AdminFrontendProps)
                 type="button" 
                 onClick={handleUpdatePost} 
                 disabled={saving}
-                className="px-4 py-2 admin-primary rounded transition-colors disabled:opacity-50"
+                className="px-3 py-1.5 text-sm admin-primary rounded transition-colors disabled:opacity-50"
               >
                 {saving ? 'Saving...' : 'Save Changes'}
               </button>

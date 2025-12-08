@@ -149,6 +149,7 @@ export default function PostPage() {
           <img 
             src={post.thumbnail} 
             alt={post.title}
+            loading="eager"
             className="w-full h-[400px] object-cover"
           />
         </div>

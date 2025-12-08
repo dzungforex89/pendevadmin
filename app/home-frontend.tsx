@@ -118,9 +118,12 @@ export default function HomeFrontend({ initialPosts = [] }: HomeFrontendProps) {
     setCurrentPage(1);
   }, [searchQuery, showPinnedOnly]);
 
-  // Smooth scroll to top when page changes
+  // Instant scroll to top when page changes (faster than smooth)
   useEffect(() => {
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    // Use requestAnimationFrame for better performance
+    requestAnimationFrame(() => {
+      window.scrollTo(0, 0);
+    });
   }, [currentPage]);
 
   // Memoize page change handler
