@@ -5,6 +5,9 @@ import Link from 'next/link';
 import dynamic from 'next/dynamic';
 import StickyEditorToolbar from '../components/StickyEditorToolbar';
 import RelatedArticlesSelector from '../components/RelatedArticlesSelector';
+import ImageContextMenu from '../components/ImageContextMenu';
+import ImageCropModal from '../components/ImageCropModal';
+import AltTextModal from '../components/AltTextModal';
 import '../styles/admin.css';
 
 const ThumbnailEditor = dynamic(() => import('../components/ThumbnailEditor'), {
@@ -52,6 +55,11 @@ export default function AdminFrontend({ initialPosts = [] }: AdminFrontendProps)
   const [editThumbnail, setEditThumbnail] = useState('');
   const [editRelatedArticles, setEditRelatedArticles] = useState<string[] | null>(null);
   const [editActiveEditorRef, setEditActiveEditorRef] = useState<React.RefObject<HTMLDivElement | null>>(editTitleRef);
+
+  // Image context menu state
+  const [contextMenu, setContextMenu] = useState<{ x: number; y: number; image: HTMLImageElement; editorRef: React.RefObject<HTMLDivElement | null> } | null>(null);
+  const [cropModal, setCropModal] = useState<{ imageSrc: string; image: HTMLImageElement; editorRef: React.RefObject<HTMLDivElement | null> } | null>(null);
+  const [altTextModal, setAltTextModal] = useState<{ image: HTMLImageElement } | null>(null);
 
   useEffect(() => {
     fetch('/api/posts')
@@ -296,6 +304,73 @@ export default function AdminFrontend({ initialPosts = [] }: AdminFrontendProps)
     setEditRelatedArticles(null);
   }
 
+  // Image context menu handlers
+  const handleImageContextMenu = (e: React.MouseEvent<HTMLDivElement>, editorRef: React.RefObject<HTMLDivElement | null>) => {
+    const target = e.target as HTMLElement;
+    if (target.tagName === 'IMG') {
+      e.preventDefault();
+      e.stopPropagation();
+      setContextMenu({
+        x: e.clientX,
+        y: e.clientY,
+        image: target as HTMLImageElement,
+        editorRef
+      });
+    }
+  };
+
+  const handleCrop = () => {
+    if (contextMenu) {
+      setCropModal({
+        imageSrc: contextMenu.image.src,
+        image: contextMenu.image,
+        editorRef: contextMenu.editorRef
+      });
+      setContextMenu(null);
+    }
+  };
+
+  const handleAltText = () => {
+    if (contextMenu) {
+      setAltTextModal({
+        image: contextMenu.image
+      });
+      setContextMenu(null);
+    }
+  };
+
+  const handleDelete = () => {
+    if (contextMenu) {
+      contextMenu.image.remove();
+      setContextMenu(null);
+    }
+  };
+
+  const handleCropApply = (croppedImageSrc: string) => {
+    if (cropModal) {
+      cropModal.image.src = croppedImageSrc;
+      setCropModal(null);
+    }
+  };
+
+  const handleAltTextApply = (altText: string) => {
+    if (altTextModal) {
+      altTextModal.image.alt = altText;
+      setAltTextModal(null);
+    }
+  };
+
+  // Close context menu on click outside
+  useEffect(() => {
+    const handleClick = () => {
+      if (contextMenu) {
+        setContextMenu(null);
+      }
+    };
+    document.addEventListener('click', handleClick);
+    return () => document.removeEventListener('click', handleClick);
+  }, [contextMenu]);
+
   return (
     <section>
       <StickyEditorToolbar
@@ -368,6 +443,7 @@ export default function AdminFrontend({ initialPosts = [] }: AdminFrontendProps)
               contentEditable
               onKeyDown={handleContentKeyDown}
               onFocus={() => setActiveEditorRef(contentRef)}
+              onContextMenu={(e) => handleImageContextMenu(e, contentRef)}
               onDragOver={(e) => {
                 e.preventDefault();
                 e.stopPropagation();
@@ -390,9 +466,28 @@ export default function AdminFrontend({ initialPosts = [] }: AdminFrontendProps)
                       if (selection && selection.rangeCount > 0) {
                         const range = selection.getRangeAt(0);
                         range.insertNode(img);
+                        // Thêm 1 dòng trống sau ảnh
+                        const br = document.createElement('br');
+                        range.setStartAfter(img);
+                        range.collapse(true);
+                        range.insertNode(br);
+                        range.setStartAfter(br);
+                        range.collapse(true);
+                        selection.removeAllRanges();
+                        selection.addRange(range);
                         contentRef.current?.focus();
                       } else if (contentRef.current) {
                         contentRef.current.appendChild(img);
+                        // Thêm 1 dòng trống sau ảnh
+                        const br = document.createElement('br');
+                        contentRef.current.appendChild(br);
+                        // Đặt cursor sau dòng trống
+                        const range = document.createRange();
+                        range.setStartAfter(br);
+                        range.collapse(true);
+                        const selection = window.getSelection();
+                        selection?.removeAllRanges();
+                        selection?.addRange(range);
                         contentRef.current.focus();
                       }
                     };
@@ -557,6 +652,7 @@ export default function AdminFrontend({ initialPosts = [] }: AdminFrontendProps)
                   contentEditable
                   onKeyDown={handleContentKeyDown}
                   onFocus={() => setEditActiveEditorRef(editContentRef)}
+                  onContextMenu={(e) => handleImageContextMenu(e, editContentRef)}
                   className="w-full min-h-[200px] admin-input border-2 px-2 py-1.5 prose rounded text-sm"
                   style={{ color: 'oklch(0.22 0.04 260)' }}
                 />
@@ -591,6 +687,36 @@ export default function AdminFrontend({ initialPosts = [] }: AdminFrontendProps)
             </div>
           </div>
         </div>
+      )}
+
+      {/* Image Context Menu */}
+      {contextMenu && (
+        <ImageContextMenu
+          x={contextMenu.x}
+          y={contextMenu.y}
+          onClose={() => setContextMenu(null)}
+          onCrop={handleCrop}
+          onAltText={handleAltText}
+          onDelete={handleDelete}
+        />
+      )}
+
+      {/* Image Crop Modal */}
+      {cropModal && (
+        <ImageCropModal
+          imageSrc={cropModal.imageSrc}
+          onClose={() => setCropModal(null)}
+          onApply={handleCropApply}
+        />
+      )}
+
+      {/* Alt Text Modal */}
+      {altTextModal && (
+        <AltTextModal
+          currentAlt={altTextModal.image.alt || ''}
+          onClose={() => setAltTextModal(null)}
+          onApply={handleAltTextApply}
+        />
       )}
     </section>
   );
