@@ -68,6 +68,19 @@ export default function AdminFrontend({ initialPosts = [] }: AdminFrontendProps)
       .catch(() => setPosts([]));
   }, []);
 
+  async function handleLogout() {
+    try {
+      await fetch('/api/logout', {
+        method: 'POST',
+        credentials: 'include',
+      });
+      router.push('/login');
+      router.refresh();
+    } catch (err) {
+      console.error('Logout error:', err);
+    }
+  }
+
   // When editing modal opens, populate editor with original content
   useEffect(() => {
     if (editingId && editingPost) {
@@ -379,7 +392,28 @@ export default function AdminFrontend({ initialPosts = [] }: AdminFrontendProps)
         excerptRef={excerptRef}
         contentRef={contentRef}
       />
-      <h1 className="text-2xl font-semibold mb-4 admin-text">Admin Console</h1>
+      <div className="flex items-center justify-between mb-4">
+        <h1 className="text-2xl font-semibold admin-text">Admin Console</h1>
+        <button
+          onClick={handleLogout}
+          className="px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 flex items-center gap-2"
+          style={{ 
+            backgroundColor: 'oklch(0.5 0.2 240)',
+            color: 'white'
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.backgroundColor = 'oklch(0.45 0.2 240)';
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.backgroundColor = 'oklch(0.5 0.2 240)';
+          }}
+        >
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+          </svg>
+          Đăng xuất
+        </button>
+      </div>
 
       <form onSubmit={handleSave} className="space-y-4 mb-6">
         <div>

@@ -192,7 +192,6 @@ These are frequently overlooked issues that make UI look unprofessional:
 ---
 
 ## Pre-Delivery Checklist
-
 Before delivering UI code, verify these items:
 
 ### Visual Quality

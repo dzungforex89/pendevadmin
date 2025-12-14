@@ -31,6 +31,107 @@ app.prepare().then(async () => {
   server.use(express.json({ limit: '50mb' }));
   server.use(express.urlencoded({ limit: '50mb', extended: true }));
 
+  // Simple session storage (in production, use Redis or database)
+  const sessions = new Map<string, { username: string; expires: number }>();
+  const SESSION_SECRET = process.env.SESSION_SECRET || 'your-secret-key-change-in-production';
+  const ADMIN_USERNAME = process.env.ADMIN_USERNAME || 'admin';
+  const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'password';
+
+  // Helper function to generate session ID
+  function generateSessionId(): string {
+    return Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+  }
+
+  // Helper function to check if user is authenticated
+  function isAuthenticated(req: any): boolean {
+    const sessionId = req.cookies?.sessionId || req.headers.cookie?.split('sessionId=')[1]?.split(';')[0];
+    if (!sessionId) return false;
+    
+    const session = sessions.get(sessionId);
+    if (!session) return false;
+    
+    // Check if session expired (30 days / 1 month)
+    if (Date.now() > session.expires) {
+      sessions.delete(sessionId);
+      return false;
+    }
+    
+    return true;
+  }
+
+  // Middleware to parse cookies manually (simple approach)
+  server.use((req: any, res: any, next: any) => {
+    req.cookies = {};
+    if (req.headers.cookie) {
+      req.headers.cookie.split(';').forEach((cookie: string) => {
+        const parts = cookie.trim().split('=');
+        if (parts.length === 2) {
+          req.cookies[parts[0]] = decodeURIComponent(parts[1]);
+        }
+      });
+    }
+    next();
+  });
+
+  // Login endpoint
+  server.post('/api/login', async (req, res) => {
+    try {
+      const { username, password } = req.body;
+      
+      if (username === ADMIN_USERNAME && password === ADMIN_PASSWORD) {
+        // Create session
+        const sessionId = generateSessionId();
+        const expires = Date.now() + 30 * 24 * 60 * 60 * 1000; // 30 days (1 month)
+        
+        sessions.set(sessionId, { username, expires });
+        
+        // Set cookie
+        res.cookie('sessionId', sessionId, {
+          httpOnly: true,
+          secure: process.env.NODE_ENV === 'production',
+          sameSite: 'lax',
+          maxAge: 30 * 24 * 60 * 60 * 1000 // 30 days (1 month)
+        });
+        
+        res.json({ success: true, message: 'Đăng nhập thành công' });
+      } else {
+        res.status(401).json({ error: 'Tên đăng nhập hoặc mật khẩu không đúng' });
+      }
+    } catch (err: any) {
+      // eslint-disable-next-line no-console
+      console.error('POST /api/login error:', err);
+      res.status(500).json({ error: 'Lỗi đăng nhập' });
+    }
+  });
+
+  // Logout endpoint
+  server.post('/api/logout', (req, res) => {
+    const sessionId = req.cookies?.sessionId;
+    if (sessionId) {
+      sessions.delete(sessionId);
+    }
+    res.clearCookie('sessionId');
+    res.json({ success: true, message: 'Đăng xuất thành công' });
+  });
+
+  // Check authentication status
+  server.get('/api/auth/check', (req: any, res) => {
+    if (isAuthenticated(req)) {
+      res.json({ authenticated: true });
+    } else {
+      res.status(401).json({ authenticated: false });
+    }
+  });
+
+  // Middleware to protect admin API routes
+  const protectAdminRoutes = (req: any, res: any, next: any) => {
+    if (isAuthenticated(req)) {
+      next();
+    } else {
+      res.status(401).json({ error: 'Unauthorized' });
+    }
+  };
+
   // List all posts
   server.get('/api/posts', async (req, res) => {
     try {
@@ -232,8 +333,8 @@ app.prepare().then(async () => {
     }
   });
 
-  // Create a post
-  server.post('/api/posts', async (req, res) => {
+  // Create a post (protected)
+  server.post('/api/posts', protectAdminRoutes, async (req, res) => {
     try {
       if (!dbConnected) {
         return res.status(503).json({ error: 'Database not connected' });
@@ -290,8 +391,8 @@ app.prepare().then(async () => {
     }
   });
 
-  // Update a post
-  server.put('/api/posts/:id', async (req, res) => {
+  // Update a post (protected)
+  server.put('/api/posts/:id', protectAdminRoutes, async (req, res) => {
     try {
       if (!dbConnected) {
         return res.status(503).json({ error: 'Database not connected' });
@@ -349,8 +450,8 @@ app.prepare().then(async () => {
     }
   });
 
-  // Delete a post
-  server.delete('/api/posts/:id', async (req, res) => {
+  // Delete a post (protected)
+  server.delete('/api/posts/:id', protectAdminRoutes, async (req, res) => {
     try {
       if (!dbConnected) {
         return res.status(503).json({ error: 'Database not connected' });
