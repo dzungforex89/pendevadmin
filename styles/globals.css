@@ -5,9 +5,9 @@
 @tailwind utilities;
 
 :root {
-  --secondary: oklch(0.3036 0.1223 288);
-  --primary: oklch(0.5638 0.2255 24.24);
-  --foreground: oklch(0.22 0.04 260);
+  --primary: #DC143C; /* crimson */
+  --secondary: #FF0000; /* red */
+  --foreground: #111827; /* dark slate */
 }
 
 html, body, #__next {
@@ -59,13 +59,13 @@ h1, h2, h3, h4, h5, h6 {
 
 /* Auto color links */
 .prose a {
-  color: oklch(0.5638 0.2255 24.24) !important;
+  color: var(--primary) !important;
   text-decoration: underline;
   transition: color 0.2s;
 }
 
 .prose a:hover {
-  color: oklch(0.50 0.2255 24.24) !important;
+  color: var(--secondary) !important;
 }
 
 /* Table styles */
@@ -75,20 +75,20 @@ h1, h2, h3, h4, h5, h6 {
   margin: 1.5rem 0;
   border-radius: 8px;
   overflow: hidden;
-  border: 1px solid oklch(0.3036 0.1223 288 / 0.2);
+  border: 1px solid rgba(17,24,39,0.08);
 }
 
 .prose table td,
 .prose table th {
-  border: 1px solid oklch(0.3036 0.1223 288 / 0.2);
+  border: 1px solid rgba(17,24,39,0.08);
   padding: 12px;
   text-align: left;
 }
 
 .prose table th {
-  background-color: oklch(0.95 0.01 260);
+  background-color: white;
   font-weight: 600;
-  color: oklch(0.22 0.04 260);
+  color: var(--foreground);
 }
 
 /* Smooth transitions for all interactive elements */
@@ -102,6 +102,6 @@ h1, h2, h3, h4, h5, h6 {
 button:focus-visible,
 a:focus-visible,
 input:focus-visible {
-  outline: 2px solid oklch(0.5638 0.2255 24.24);
+  outline: 2px solid var(--primary);
   outline-offset: 2px;
 }

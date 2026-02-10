@@ -53,8 +53,8 @@ export default function Pagination({ currentPage, totalPages, onPageChange }: Pa
         disabled={currentPage === 1}
         className="px-4 py-2 rounded-xl border transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer font-medium"
         style={{
-          borderColor: currentPage === 1 ? 'oklch(0.3036 0.1223 288 / 0.2)' : 'oklch(0.3036 0.1223 288 / 0.3)',
-          color: currentPage === 1 ? 'oklch(0.5 0.04 260)' : 'oklch(0.22 0.04 260)',
+          borderColor: currentPage === 1 ? 'rgba(17,24,39,0.08)' : 'rgba(17,24,39,0.12)',
+          color: currentPage === 1 ? 'rgba(17,24,39,0.9)' : 'rgba(17,24,39,0.7)',
           backgroundColor: 'white'
         }}
         onMouseEnter={(e) => {
@@ -84,7 +84,7 @@ export default function Pagination({ currentPage, totalPages, onPageChange }: Pa
             <span 
               key={`ellipsis-${index}`} 
               className="px-2"
-              style={{ color: 'oklch(0.5 0.04 260)' }}
+              style={{ color: 'rgba(17,24,39,0.9)' }}
             >
               ...
             </span>
@@ -99,21 +99,21 @@ export default function Pagination({ currentPage, totalPages, onPageChange }: Pa
             onClick={() => onPageChange(pageNum)}
             className="px-4 py-2 rounded-xl border transition-all duration-200 cursor-pointer font-medium min-w-[44px]"
             style={{
-              backgroundColor: isActive ? 'oklch(0.5638 0.2255 24.24)' : 'white',
-              borderColor: isActive ? 'oklch(0.5638 0.2255 24.24)' : 'oklch(0.3036 0.1223 288 / 0.3)',
-              color: isActive ? 'white' : 'oklch(0.22 0.04 260)',
-              boxShadow: isActive ? '0 2px 8px oklch(0.5638 0.2255 24.24 / 0.3)' : 'none'
+              backgroundColor: isActive ? 'var(--primary)' : 'white',
+              borderColor: isActive ? 'var(--primary)' : 'rgba(17,24,39,0.12)',
+              color: isActive ? 'white' : 'rgba(17,24,39,0.7)',
+              boxShadow: isActive ? '0 2px 8px rgba(220,20,60,0.18)' : 'none'
             }}
             onMouseEnter={(e) => {
               if (!isActive) {
-                e.currentTarget.style.backgroundColor = 'oklch(0.98 0.01 260)';
-                e.currentTarget.style.borderColor = 'oklch(0.5638 0.2255 24.24)';
+                e.currentTarget.style.backgroundColor = 'white';
+                e.currentTarget.style.borderColor = 'var(--primary)';
               }
             }}
             onMouseLeave={(e) => {
               if (!isActive) {
                 e.currentTarget.style.backgroundColor = 'white';
-                e.currentTarget.style.borderColor = 'oklch(0.3036 0.1223 288 / 0.3)';
+                e.currentTarget.style.borderColor = 'rgba(17,24,39,0.12)';
               }
             }}
           >
@@ -127,20 +127,20 @@ export default function Pagination({ currentPage, totalPages, onPageChange }: Pa
         disabled={currentPage === totalPages}
         className="px-4 py-2 rounded-xl border transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer font-medium"
         style={{
-          borderColor: currentPage === totalPages ? 'oklch(0.3036 0.1223 288 / 0.2)' : 'oklch(0.3036 0.1223 288 / 0.3)',
-          color: currentPage === totalPages ? 'oklch(0.5 0.04 260)' : 'oklch(0.22 0.04 260)',
+          borderColor: currentPage === totalPages ? 'rgba(17,24,39,0.08)' : 'rgba(17,24,39,0.12)',
+          color: currentPage === totalPages ? 'rgba(17,24,39,0.9)' : 'rgba(17,24,39,0.7)',
           backgroundColor: 'white'
         }}
         onMouseEnter={(e) => {
           if (currentPage !== totalPages) {
-            e.currentTarget.style.backgroundColor = 'oklch(0.98 0.01 260)';
-            e.currentTarget.style.borderColor = 'oklch(0.5638 0.2255 24.24)';
+            e.currentTarget.style.backgroundColor = 'white';
+            e.currentTarget.style.borderColor = 'var(--primary)';
           }
         }}
         onMouseLeave={(e) => {
           if (currentPage !== totalPages) {
             e.currentTarget.style.backgroundColor = 'white';
-            e.currentTarget.style.borderColor = 'oklch(0.3036 0.1223 288 / 0.3)';
+            e.currentTarget.style.borderColor = 'rgba(17,24,39,0.12)';
           }
         }}
       >

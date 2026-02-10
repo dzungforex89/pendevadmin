@@ -38,7 +38,6 @@ export default function Sidebar() {
   const [isMobileOpen, setIsMobileOpen] = useState(false);
   const { isCollapsed, setIsCollapsed } = useSidebar();
 
-  // Save collapsed state to localStorage
   useEffect(() => {
     const saved = localStorage.getItem('sidebar-collapsed');
     if (saved !== null) {
@@ -61,13 +60,13 @@ export default function Sidebar() {
         className="lg:hidden fixed top-4 left-4 z-50 p-2 rounded-lg transition-all duration-200 cursor-pointer"
         style={{
           backgroundColor: 'white',
-          borderColor: 'oklch(0.3036 0.1223 288 / 0.3)',
+          borderColor: 'rgba(17,24,39,0.08)',
           borderWidth: '1px',
-          boxShadow: '0 2px 8px oklch(0.22 0.04 260 / 0.1)'
+          boxShadow: '0 2px 8px rgba(17,24,39,0.06)'
         }}
         aria-label="Toggle menu"
       >
-        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" style={{ color: 'oklch(0.22 0.04 260)' }}>
+        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" style={{ color: 'var(--foreground)' }}>
           {isMobileOpen ? (
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
           ) : (
@@ -91,37 +90,37 @@ export default function Sidebar() {
         } lg:translate-x-0`}
         style={{
           width: sidebarWidth,
-          backgroundColor: 'oklch(0.98 0.01 260)',
-          borderRightColor: 'oklch(0.3036 0.1223 288 / 0.2)',
+          backgroundColor: 'white',
+          borderRightColor: 'rgba(17,24,39,0.08)',
           borderRightWidth: '1px',
-          boxShadow: '2px 0 8px oklch(0.22 0.04 260 / 0.05)'
+          boxShadow: '2px 0 8px rgba(17,24,39,0.04)'
         }}
       >
         <div className="flex flex-col h-full">
           {/* Logo Section */}
-          <div className="px-6 py-6 border-b flex items-center justify-between" style={{ borderColor: 'oklch(0.3036 0.1223 288 / 0.2)' }}>
+          <div className="px-6 py-6 border-b flex items-center justify-between" style={{ borderColor: 'rgba(17,24,39,0.08)' }}>
             {isExpanded ? (
               <>
                 <Link
                   href="/"
                   className="text-2xl font-bold transition-opacity duration-200 cursor-pointer hover:opacity-80 flex-1"
-                  style={{ color: 'oklch(0.5638 0.2255 24.24)' }}
+                  style={{ color: 'var(--primary)' }}
                   onClick={() => setIsMobileOpen(false)}
                 >
-                  10SAT Console
+                  PenDev Console
                 </Link>
                 <button
                   onClick={() => setIsCollapsed(!isCollapsed)}
                   className="p-2 rounded-lg transition-all duration-200 cursor-pointer hover:bg-opacity-80"
                   style={{
-                    backgroundColor: 'oklch(0.95 0.01 260)',
-                    color: 'oklch(0.22 0.04 260)'
+                    backgroundColor: 'rgba(255,255,255,0.9)',
+                    color: 'var(--foreground)'
                   }}
                   onMouseEnter={(e) => {
-                    e.currentTarget.style.backgroundColor = 'oklch(0.90 0.01 260)';
+                    e.currentTarget.style.backgroundColor = 'rgba(245,245,245,0.9)';
                   }}
                   onMouseLeave={(e) => {
-                    e.currentTarget.style.backgroundColor = 'oklch(0.95 0.01 260)';
+                    e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.9)';
                   }}
                   aria-label="Collapse sidebar"
                 >
@@ -136,14 +135,14 @@ export default function Sidebar() {
                   onClick={() => setIsCollapsed(!isCollapsed)}
                   className="p-2 rounded-lg transition-all duration-200 cursor-pointer"
                   style={{
-                    backgroundColor: 'oklch(0.95 0.01 260)',
-                    color: 'oklch(0.22 0.04 260)'
+                    backgroundColor: 'rgba(255,255,255,0.9)',
+                    color: 'var(--foreground)'
                   }}
                   onMouseEnter={(e) => {
-                    e.currentTarget.style.backgroundColor = 'oklch(0.90 0.01 260)';
+                    e.currentTarget.style.backgroundColor = 'rgba(245,245,245,0.9)';
                   }}
                   onMouseLeave={(e) => {
-                    e.currentTarget.style.backgroundColor = 'oklch(0.95 0.01 260)';
+                    e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.9)';
                   }}
                   aria-label="Expand sidebar"
                 >
@@ -167,13 +166,13 @@ export default function Sidebar() {
                     isActive ? 'shadow-sm' : ''
                   } ${isExpanded ? '' : 'justify-center'}`}
                   style={{
-                    backgroundColor: isActive ? 'oklch(0.5638 0.2255 24.24)' : 'transparent',
-                    color: isActive ? 'white' : 'oklch(0.22 0.04 260)',
+                    backgroundColor: isActive ? 'var(--primary)' : 'transparent',
+                    color: isActive ? 'white' : 'var(--foreground)',
                     minWidth: isExpanded ? 'auto' : '48px',
                   }}
                   onMouseEnter={(e) => {
                     if (!isActive) {
-                      e.currentTarget.style.backgroundColor = 'oklch(0.95 0.01 260)';
+                      e.currentTarget.style.backgroundColor = 'rgba(245,245,245,0.9)';
                     }
                   }}
                   onMouseLeave={(e) => {
@@ -193,27 +192,27 @@ export default function Sidebar() {
 
           {/* Footer Section */}
           {isExpanded && (
-            <div className="px-4 py-6 border-t" style={{ borderColor: 'oklch(0.3036 0.1223 288 / 0.2)' }}>
+            <div className="px-4 py-6 border-t" style={{ borderColor: 'rgba(17,24,39,0.08)' }}>
               <div className="flex items-center gap-3 mb-3">
                 <div
                   className="w-10 h-10 rounded-lg flex items-center justify-center font-semibold flex-shrink-0"
                   style={{
-                    backgroundColor: 'oklch(0.5638 0.2255 24.24 / 0.1)',
-                    color: 'oklch(0.5638 0.2255 24.24)'
+                    backgroundColor: 'rgba(220,20,60,0.08)',
+                    color: 'var(--primary)'
                   }}
                 >
                   PA
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium truncate" style={{ color: 'oklch(0.22 0.04 260)' }}>
+                  <p className="text-sm font-medium truncate" style={{ color: 'var(--foreground)' }}>
                     Pencil Ai
                   </p>
-                  <p className="text-xs truncate" style={{ color: 'oklch(0.5 0.04 260)' }}>
+                  <p className="text-xs truncate" style={{ color: 'rgba(17,24,39,0.5)' }}>
                     ADMIN
                   </p>
                 </div>
               </div>
-              <p className="text-xs truncate" style={{ color: 'oklch(0.5 0.04 260)' }}>
+              <p className="text-xs truncate" style={{ color: 'rgba(17,24,39,0.5)' }}>
                 aipencilclass@gmail.com
               </p>
             </div>

@@ -192,8 +192,8 @@ export default function StickyEditorToolbar({
       className="sticky top-0 z-50 flex-1"
       style={{ 
         ...toolbarStyle,
-        backgroundColor: 'oklch(0.98 0.01 260)',
-        borderColor: 'oklch(0.3036 0.1223 288)'
+        backgroundColor: 'white',
+        borderColor: 'rgba(17,24,39,0.08)'
       }}
     >
       <div
@@ -201,14 +201,14 @@ export default function StickyEditorToolbar({
       >
       {/* Font Size */}
       <div className="flex items-center gap-1">
-        <label className="text-xs" style={{ color: 'oklch(0.22 0.04 260)' }}>Size:</label>
+        <label className="text-xs" style={{ color: 'var(--foreground)' }}>Size:</label>
         <select
           onChange={(e) => handleFontSize(e.target.value)}
           className="rounded px-2 py-1 text-sm"
           style={{ 
-            borderColor: 'oklch(0.3036 0.1223 288)',
+            borderColor: 'rgba(17,24,39,0.08)',
             borderWidth: '1px',
-            color: 'oklch(0.22 0.04 260)'
+            color: 'var(--foreground)'
           }}
           defaultValue="16px"
         >
@@ -220,14 +220,14 @@ export default function StickyEditorToolbar({
 
       {/* Font Family */}
       <div className="flex items-center gap-1">
-        <label className="text-xs" style={{ color: 'oklch(0.22 0.04 260)' }}>Font:</label>
+        <label className="text-xs" style={{ color: 'var(--foreground)' }}>Font:</label>
         <select
           onChange={(e) => handleFontFamily(e.target.value)}
           className="rounded px-2 py-1 text-sm"
           style={{ 
-            borderColor: 'oklch(0.3036 0.1223 288)',
+            borderColor: 'rgba(17,24,39,0.08)',
             borderWidth: '1px',
-            color: 'oklch(0.22 0.04 260)'
+            color: 'var(--foreground)'
           }}
           defaultValue="Arial"
         >
@@ -237,7 +237,7 @@ export default function StickyEditorToolbar({
         </select>
       </div>
 
-      <div className="w-px h-6" style={{ backgroundColor: 'oklch(0.3036 0.1223 288)' }}></div>
+      <div className="w-px h-6" style={{ backgroundColor: 'rgba(17,24,39,0.08)' }}></div>
 
       {/* Text Formatting */}
       <button
@@ -245,11 +245,11 @@ export default function StickyEditorToolbar({
         onClick={() => execCommand('bold')}
         className="px-2 py-1 rounded text-sm font-bold transition-colors"
         style={{ 
-          borderColor: 'oklch(0.3036 0.1223 288)',
+          borderColor: 'rgba(17,24,39,0.08)',
           borderWidth: '1px',
-          color: 'oklch(0.22 0.04 260)'
+          color: 'var(--foreground)'
         }}
-        onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'oklch(0.95 0.01 260)'}
+        onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'rgba(245,245,245,0.9)'}
         onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
         title="Bold (Ctrl+B)"
       >
@@ -260,11 +260,11 @@ export default function StickyEditorToolbar({
         onClick={() => execCommand('italic')}
         className="px-2 py-1 rounded text-sm italic transition-colors"
         style={{ 
-          borderColor: 'oklch(0.3036 0.1223 288)',
+          borderColor: 'rgba(17,24,39,0.08)',
           borderWidth: '1px',
-          color: 'oklch(0.22 0.04 260)'
+          color: 'var(--foreground)'
         }}
-        onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'oklch(0.95 0.01 260)'}
+        onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'rgba(245,245,245,0.9)'}
         onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
         title="Italic (Ctrl+I)"
       >
@@ -275,22 +275,22 @@ export default function StickyEditorToolbar({
         onClick={() => execCommand('underline')}
         className="px-2 py-1 rounded text-sm underline transition-colors"
         style={{ 
-          borderColor: 'oklch(0.3036 0.1223 288)',
+          borderColor: 'rgba(17,24,39,0.08)',
           borderWidth: '1px',
-          color: 'oklch(0.22 0.04 260)'
+          color: 'var(--foreground)'
         }}
-        onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'oklch(0.95 0.01 260)'}
+        onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'rgba(245,245,245,0.9)'}
         onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
         title="Underline (Ctrl+U)"
       >
         U
       </button>
 
-      <div className="w-px h-6" style={{ backgroundColor: 'oklch(0.3036 0.1223 288)' }}></div>
+      <div className="w-px h-6" style={{ backgroundColor: 'rgba(17,24,39,0.08)' }}></div>
 
       {/* Highlight */}
       <div className="flex items-center gap-1">
-        <label className="text-xs" style={{ color: 'oklch(0.22 0.04 260)' }}>Highlight:</label>
+        <label className="text-xs" style={{ color: 'var(--foreground)' }}>Highlight:</label>
         <div className="flex gap-1">
           {highlightColors.map((color) => (
             <button
@@ -300,7 +300,7 @@ export default function StickyEditorToolbar({
               className="w-6 h-6 rounded hover:scale-110 transition-transform"
               style={{ 
                 backgroundColor: color,
-                borderColor: 'oklch(0.3036 0.1223 288)',
+                borderColor: 'rgba(17,24,39,0.08)',
                 borderWidth: '1px'
               }}
               title={`Highlight ${color}`}
@@ -309,18 +309,18 @@ export default function StickyEditorToolbar({
         </div>
       </div>
 
-      <div className="w-px h-6" style={{ backgroundColor: 'oklch(0.3036 0.1223 288)' }}></div>
+      <div className="w-px h-6" style={{ backgroundColor: 'rgba(17,24,39,0.08)' }}></div>
 
       {/* Line Spacing */}
       <div className="flex items-center gap-1">
-        <label className="text-xs" style={{ color: 'oklch(0.22 0.04 260)' }}>Line:</label>
+        <label className="text-xs" style={{ color: 'var(--foreground)' }}>Line:</label>
         <select
           onChange={(e) => handleLineSpacing(e.target.value)}
           className="rounded px-2 py-1 text-sm"
           style={{ 
-            borderColor: 'oklch(0.3036 0.1223 288)',
+            borderColor: 'rgba(17,24,39,0.08)',
             borderWidth: '1px',
-            color: 'oklch(0.22 0.04 260)'
+            color: 'var(--foreground)'
           }}
           defaultValue="1.5"
         >
@@ -330,11 +330,11 @@ export default function StickyEditorToolbar({
         </select>
       </div>
 
-      <div className="w-px h-6" style={{ backgroundColor: 'oklch(0.3036 0.1223 288)' }}></div>
+      <div className="w-px h-6" style={{ backgroundColor: 'rgba(17,24,39,0.08)' }}></div>
 
       {/* Text Color */}
       <div className="flex items-center gap-1">
-        <label className="text-xs" style={{ color: 'oklch(0.22 0.04 260)' }}>Text:</label>
+        <label className="text-xs" style={{ color: 'var(--foreground)' }}>Text:</label>
         <div className="flex gap-1">
           {textColors.map((color) => (
             <button
@@ -344,7 +344,7 @@ export default function StickyEditorToolbar({
               className="w-6 h-6 rounded hover:scale-110 transition-transform"
               style={{ 
                 backgroundColor: color,
-                borderColor: 'oklch(0.3036 0.1223 288)',
+                borderColor: 'rgba(17,24,39,0.08)',
                 borderWidth: '1px'
               }}
               title={`Text color ${color}`}
@@ -353,7 +353,7 @@ export default function StickyEditorToolbar({
         </div>
       </div>
 
-      <div className="w-px h-6" style={{ backgroundColor: 'oklch(0.3036 0.1223 288)' }}></div>
+      <div className="w-px h-6" style={{ backgroundColor: 'rgba(17,24,39,0.08)' }}></div>
 
       {/* Link */}
       <button
@@ -361,11 +361,11 @@ export default function StickyEditorToolbar({
         onClick={handleLink}
         className="px-2 py-1 rounded text-sm transition-colors"
         style={{ 
-          borderColor: 'oklch(0.3036 0.1223 288)',
+          borderColor: 'rgba(17,24,39,0.08)',
           borderWidth: '1px',
-          color: 'oklch(0.22 0.04 260)'
+          color: 'var(--foreground)'
         }}
-        onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'oklch(0.95 0.01 260)'}
+        onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'rgba(245,245,245,0.9)'}
         onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
         title="Insert Link"
       >
@@ -376,18 +376,18 @@ export default function StickyEditorToolbar({
         onClick={handleUnlink}
         className="px-2 py-1 rounded text-sm transition-colors"
         style={{ 
-          borderColor: 'oklch(0.3036 0.1223 288)',
+          borderColor: 'rgba(17,24,39,0.08)',
           borderWidth: '1px',
-          color: 'oklch(0.22 0.04 260)'
+          color: 'var(--foreground)'
         }}
-        onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'oklch(0.95 0.01 260)'}
+        onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'rgba(245,245,245,0.9)'}
         onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
         title="Remove Link"
       >
         Unlink
       </button>
 
-      <div className="w-px h-6" style={{ backgroundColor: 'oklch(0.3036 0.1223 288)' }}></div>
+      <div className="w-px h-6" style={{ backgroundColor: 'rgba(17,24,39,0.08)' }}></div>
 
       {/* Table */}
       <button
@@ -395,11 +395,11 @@ export default function StickyEditorToolbar({
         onClick={handleInsertTable}
         className="px-2 py-1 rounded text-sm transition-colors"
         style={{ 
-          borderColor: 'oklch(0.3036 0.1223 288)',
+          borderColor: 'rgba(17,24,39,0.08)',
           borderWidth: '1px',
-          color: 'oklch(0.22 0.04 260)'
+          color: 'var(--foreground)'
         }}
-        onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'oklch(0.95 0.01 260)'}
+        onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'rgba(245,245,245,0.9)'}
         onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
         title="Insert Table"
       >

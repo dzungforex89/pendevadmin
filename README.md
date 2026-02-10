@@ -1,4 +1,4 @@
-# 10SAT Console - Modern Blog Platform
+# PenDev Console - Modern Blog Platform
 
 A feature-rich, modern blog platform built with Next.js 14 (App Router), TypeScript, Tailwind CSS, Express custom server, and PostgreSQL database using Prisma ORM. Features a beautiful oklch color palette, rich text editing, image management, and comprehensive post management.
 
@@ -394,7 +394,7 @@ This project is private and proprietary.
 
 ## 👤 Author
 
-10SAT Console Development Team
+PenDev Console Development Team
 
 ---
 

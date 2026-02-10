@@ -132,9 +132,9 @@ function PostCardComponent({ post, onPinToggle, isSelected = false, onSelect, on
         <article 
           className="rounded-xl overflow-hidden bg-white border transition-all duration-200 h-full flex flex-col hover:shadow-lg"
           style={{
-            borderColor: isSelected ? 'oklch(0.5638 0.2255 24.24)' : 'oklch(0.3036 0.1223 288 / 0.3)',
+            borderColor: isSelected ? 'var(--primary)' : 'rgba(17,24,39,0.08)',
             borderWidth: isSelected ? '2px' : '1px',
-            boxShadow: isSelected ? '0 4px 12px oklch(0.5638 0.2255 24.24 / 0.2)' : '0 1px 3px oklch(0.22 0.04 260 / 0.1)',
+            boxShadow: isSelected ? '0 4px 12px rgba(220,20,60,0.2)' : '0 1px 3px rgba(17,24,39,0.06)',
           }}
         >
           <div className="relative w-full h-36 bg-gray-100 overflow-hidden">
@@ -145,12 +145,12 @@ function PostCardComponent({ post, onPinToggle, isSelected = false, onSelect, on
               className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
             />
             {post.pinned && (
-              <div 
+                <div 
                 className="absolute top-3 left-3 px-2.5 py-1 rounded-md text-xs font-semibold z-10 flex items-center gap-1.5"
                 style={{
-                  backgroundColor: 'oklch(0.5638 0.2255 24.24)',
+                  backgroundColor: 'var(--primary)',
                   color: 'white',
-                  boxShadow: '0 2px 8px oklch(0.5638 0.2255 24.24 / 0.3)'
+                  boxShadow: '0 2px 8px rgba(220,20,60,0.3)'
                 }}
               >
                 <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20">
@@ -163,17 +163,17 @@ function PostCardComponent({ post, onPinToggle, isSelected = false, onSelect, on
           <div className="p-3 flex-1 flex flex-col">
             <h3 
               className="text-base font-semibold mb-1.5 line-clamp-2 transition-colors duration-200"
-              style={{ color: 'oklch(0.22 0.04 260)' }}
+              style={{ color: 'var(--foreground)' }}
             >
               {cleanTitle}
             </h3>
             <p 
               className="text-xs line-clamp-3 flex-1" 
-              style={{ color: 'oklch(0.45 0.04 260)' }}
+              style={{ color: 'rgba(17,24,39,0.65)' }}
             >
               {cleanExcerpt}
             </p>
-            <div className="mt-1.5 text-xs" style={{ color: 'oklch(0.5 0.04 260)', fontSize: '0.65rem' }}>
+            <div className="mt-1.5 text-xs" style={{ color: 'rgba(17,24,39,0.6)', fontSize: '0.65rem' }}>
               {formattedDate}
             </div>
           </div>
@@ -195,8 +195,8 @@ function PostCardComponent({ post, onPinToggle, isSelected = false, onSelect, on
           <div 
             className="w-5 h-5 rounded border-2 flex items-center justify-center transition-all duration-200"
             style={{
-              borderColor: isSelected ? 'oklch(0.5638 0.2255 24.24)' : 'oklch(0.3036 0.1223 288)',
-              backgroundColor: isSelected ? 'oklch(0.5638 0.2255 24.24)' : 'white',
+              borderColor: isSelected ? 'var(--primary)' : 'rgba(17,24,39,0.08)',
+              backgroundColor: isSelected ? 'var(--primary)' : 'white',
             }}
           >
             {isSelected && (
@@ -219,10 +219,10 @@ function PostCardComponent({ post, onPinToggle, isSelected = false, onSelect, on
           className="absolute top-3 right-3 p-2 rounded-lg shadow-md transition-all duration-200 z-10 cursor-pointer hover:shadow-lg"
           style={{
             backgroundColor: 'white',
-            color: 'oklch(0.22 0.04 260)',
+            color: 'var(--foreground)',
           }}
           onMouseEnter={(e) => {
-            e.currentTarget.style.backgroundColor = 'oklch(0.98 0.01 260)';
+            e.currentTarget.style.backgroundColor = 'rgba(245,245,245,0.9)';
             e.currentTarget.style.transform = 'scale(1.05)';
           }}
           onMouseLeave={(e) => {
@@ -244,16 +244,16 @@ function PostCardComponent({ post, onPinToggle, isSelected = false, onSelect, on
           className="absolute top-12 right-3 rounded-lg shadow-xl py-1.5 z-20 min-w-[140px] border transition-all duration-200"
           style={{
             backgroundColor: 'white',
-            borderColor: 'oklch(0.3036 0.1223 288 / 0.2)',
-            boxShadow: '0 4px 12px oklch(0.22 0.04 260 / 0.15)'
+            borderColor: 'rgba(17,24,39,0.08)',
+            boxShadow: '0 4px 12px rgba(17,24,39,0.15)'
           }}
         >
           <button
             onClick={handleSelect}
             className="w-full text-left px-4 py-2 text-sm transition-colors duration-200 cursor-pointer flex items-center gap-2"
-            style={{ color: 'oklch(0.22 0.04 260)' }}
+            style={{ color: 'var(--foreground)' }}
             onMouseEnter={(e) => {
-              e.currentTarget.style.backgroundColor = 'oklch(0.95 0.01 260)';
+              e.currentTarget.style.backgroundColor = 'rgba(245,245,245,0.9)';
             }}
             onMouseLeave={(e) => {
               e.currentTarget.style.backgroundColor = 'transparent';
@@ -267,9 +267,9 @@ function PostCardComponent({ post, onPinToggle, isSelected = false, onSelect, on
           <button
             onClick={handleEdit}
             className="w-full text-left px-4 py-2 text-sm transition-colors duration-200 cursor-pointer flex items-center gap-2"
-            style={{ color: 'oklch(0.22 0.04 260)' }}
+            style={{ color: 'var(--foreground)' }}
             onMouseEnter={(e) => {
-              e.currentTarget.style.backgroundColor = 'oklch(0.95 0.01 260)';
+              e.currentTarget.style.backgroundColor = 'rgba(245,245,245,0.9)';
             }}
             onMouseLeave={(e) => {
               e.currentTarget.style.backgroundColor = 'transparent';
@@ -283,9 +283,9 @@ function PostCardComponent({ post, onPinToggle, isSelected = false, onSelect, on
           <button
             onClick={handlePin}
             className="w-full text-left px-4 py-2 text-sm transition-colors duration-200 cursor-pointer flex items-center gap-2"
-            style={{ color: 'oklch(0.22 0.04 260)' }}
+            style={{ color: 'var(--foreground)' }}
             onMouseEnter={(e) => {
-              e.currentTarget.style.backgroundColor = 'oklch(0.95 0.01 260)';
+              e.currentTarget.style.backgroundColor = 'rgba(245,245,245,0.9)';
             }}
             onMouseLeave={(e) => {
               e.currentTarget.style.backgroundColor = 'transparent';

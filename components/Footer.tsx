@@ -5,16 +5,16 @@ export default function Footer() {
     <footer 
       className="border-t py-6 mt-auto"
       style={{ 
-        borderColor: 'oklch(0.3036 0.1223 288 / 0.2)',
-        backgroundColor: 'oklch(0.98 0.01 260)'
+        borderColor: 'rgba(17,24,39,0.08)',
+        backgroundColor: 'white'
       }}
     >
       <div className="max-w-6xl mx-auto px-4">
         <p 
           className="text-sm text-center"
-          style={{ color: 'oklch(0.5 0.04 260)' }}
+          style={{ color: 'var(--foreground)' }}
         >
-          © {new Date().getFullYear()} 10SAT Console. All rights reserved.
+          © {new Date().getFullYear()} PenDev Console. All rights reserved.
         </p>
       </div>
     </footer>

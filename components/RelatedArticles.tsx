@@ -63,9 +63,9 @@ export default function RelatedArticles({ currentSlug }: RelatedArticlesProps) {
 
   if (loading) {
     return (
-      <div className="mt-16 pt-12 border-t" style={{ borderColor: 'oklch(0.3036 0.1223 288 / 0.2)' }}>
+      <div className="mt-16 pt-12 border-t" style={{ borderColor: 'rgba(17,24,39,0.08)' }}>
         <div className="flex items-center justify-center py-8">
-          <div className="inline-block animate-spin rounded-full h-8 w-8 border-4 border-solid border-current border-r-transparent" style={{ color: 'oklch(0.5638 0.2255 24.24)' }}></div>
+          <div className="inline-block animate-spin rounded-full h-8 w-8 border-4 border-solid border-current border-r-transparent" style={{ color: 'var(--primary)' }}></div>
         </div>
       </div>
     );
@@ -76,10 +76,10 @@ export default function RelatedArticles({ currentSlug }: RelatedArticlesProps) {
   }
 
   return (
-    <section className="mt-16 pt-12 border-t" style={{ borderColor: 'oklch(0.3036 0.1223 288 / 0.2)' }}>
+    <section className="mt-16 pt-12 border-t" style={{ borderColor: 'rgba(17,24,39,0.08)' }}>
       <h2 
         className="text-2xl md:text-3xl font-bold mb-8 uppercase tracking-wide"
-        style={{ color: 'oklch(0.22 0.04 260)' }}
+        style={{ color: 'var(--foreground)' }}
       >
         Những Bài Viết Liên Quan
       </h2>
@@ -102,14 +102,14 @@ export default function RelatedArticles({ currentSlug }: RelatedArticlesProps) {
               prefetch={true}
               className="group block rounded-xl overflow-hidden border transition-all duration-200 cursor-pointer bg-white hover:shadow-lg"
               style={{
-                borderColor: 'oklch(0.3036 0.1223 288 / 0.3)',
+                borderColor: 'rgba(17,24,39,0.08)',
               }}
               onMouseEnter={(e) => {
-                e.currentTarget.style.borderColor = 'oklch(0.5638 0.2255 24.24)';
+                e.currentTarget.style.borderColor = 'var(--primary)';
                 e.currentTarget.style.transform = 'translateY(-4px)';
               }}
               onMouseLeave={(e) => {
-                e.currentTarget.style.borderColor = 'oklch(0.3036 0.1223 288 / 0.3)';
+                e.currentTarget.style.borderColor = 'rgba(17,24,39,0.08)';
                 e.currentTarget.style.transform = 'translateY(0)';
               }}
             >
@@ -126,14 +126,14 @@ export default function RelatedArticles({ currentSlug }: RelatedArticlesProps) {
               {/* Content */}
               <div className="p-5 flex flex-col">
                 {/* Date */}
-                <div className="text-xs font-medium mb-3 uppercase tracking-wide" style={{ color: 'oklch(0.5 0.04 260)' }}>
+                <div className="text-xs font-medium mb-3 uppercase tracking-wide" style={{ color: 'rgba(17,24,39,0.6)' }}>
                   {formattedDate}
                 </div>
 
                 {/* Title */}
                 <h3
                   className="text-lg font-bold mb-2 line-clamp-2 transition-colors duration-200"
-                  style={{ color: 'oklch(0.22 0.04 260)' }}
+                  style={{ color: 'var(--foreground)' }}
                 >
                   {cleanTitle}
                 </h3>
@@ -141,13 +141,13 @@ export default function RelatedArticles({ currentSlug }: RelatedArticlesProps) {
                 {/* Excerpt */}
                 <p
                   className="text-sm leading-relaxed line-clamp-3 mb-4 flex-1"
-                  style={{ color: 'oklch(0.5 0.04 260)' }}
+                  style={{ color: 'rgba(17,24,39,0.6)' }}
                 >
                   {cleanExcerpt}
                 </p>
 
                 {/* Read More Link */}
-                <div className="flex items-center gap-2 text-sm font-medium mt-auto" style={{ color: 'oklch(0.5638 0.2255 24.24)' }}>
+                <div className="flex items-center gap-2 text-sm font-medium mt-auto" style={{ color: 'var(--primary)' }}>
                   <span>Đọc thêm</span>
                   <svg
                     className="w-4 h-4 transition-transform duration-200 group-hover:translate-x-1"

@@ -201,8 +201,8 @@ export default function RelatedArticlesSelector({
           placeholder="Search posts by title..."
           className="w-full px-3 py-2 rounded pr-10 border-2 admin-input"
           style={{ 
-            color: 'oklch(0.22 0.04 260)',
-            backgroundColor: 'oklch(0.98 0.01 260)'
+            color: 'var(--foreground)',
+            backgroundColor: 'white'
           }}
           autoComplete="off"
         />
@@ -212,7 +212,7 @@ export default function RelatedArticlesSelector({
           <div
             ref={dropdownRef}
             className="absolute z-50 w-full mt-1 bg-white border-2 admin-border rounded shadow-lg max-h-64 overflow-y-auto"
-            style={{ backgroundColor: 'oklch(0.98 0.01 260)' }}
+            style={{ backgroundColor: 'white' }}
           >
             {searchResults.map((post) => (
               <button
@@ -220,7 +220,7 @@ export default function RelatedArticlesSelector({
                 type="button"
                 onClick={() => handleSelectPost(post)}
                 className="w-full text-left px-4 py-3 hover:bg-gray-100 border-b admin-border last:border-b-0 transition-colors"
-                style={{ color: 'oklch(0.22 0.04 260)' }}
+                style={{ color: 'var(--foreground)' }}
               >
                 <div className="flex items-start gap-3">
                   <img
@@ -246,7 +246,7 @@ export default function RelatedArticlesSelector({
         {showDropdown && searchQuery.trim().length > 0 && searchResults.length === 0 && (
           <div
             className="absolute z-50 w-full mt-1 bg-white border-2 admin-border rounded shadow-lg p-4 text-center text-sm"
-            style={{ backgroundColor: 'oklch(0.98 0.01 260)', color: 'oklch(0.22 0.04 260)' }}
+            style={{ backgroundColor: 'white', color: 'var(--foreground)' }}
           >
             No posts found
           </div>
@@ -275,7 +275,7 @@ export default function RelatedArticlesSelector({
 
       {/* Selected Posts Preview */}
       {selectedPosts.length > 0 && (
-        <div className="space-y-2">
+            <div className="space-y-2">
           <div className="text-xs admin-text font-medium">
             Selected ({selectedPosts.length}/{maxSelections}):
           </div>
@@ -283,7 +283,7 @@ export default function RelatedArticlesSelector({
             <div
               key={post.id}
               className="flex items-start gap-3 p-3 border-2 admin-border rounded bg-gray-50"
-              style={{ backgroundColor: 'oklch(0.99 0.01 260)' }}
+                  style={{ backgroundColor: 'white' }}
             >
               <img
                 src={post.thumbnail || DEFAULT_THUMBNAIL_BASE64}
@@ -293,7 +293,7 @@ export default function RelatedArticlesSelector({
               <div className="flex-1 min-w-0">
                 <div
                   className="font-medium text-sm mb-1 line-clamp-2"
-                  style={{ color: 'oklch(0.22 0.04 260)' }}
+                  style={{ color: 'var(--foreground)' }}
                   dangerouslySetInnerHTML={{ __html: post.title }}
                 />
                 <div className="text-xs text-gray-500 line-clamp-2">

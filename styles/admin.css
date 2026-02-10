@@ -1,55 +1,55 @@
 /* Admin page color scheme */
 .admin-primary {
-  background-color: oklch(0.5638 0.2255 24.24);
+  background-color: var(--primary);
   color: white;
 }
 
 .admin-primary:hover {
-  background-color: oklch(0.50 0.2255 24.24);
+  background-color: rgba(220,20,60,0.85);
 }
 
 .admin-secondary {
-  background-color: oklch(0.3036 0.1223 288);
+  background-color: var(--secondary);
   color: white;
 }
 
 .admin-secondary:hover {
-  background-color: oklch(0.35 0.1223 288);
+  background-color: rgba(255,0,0,0.85);
 }
 
 .admin-border {
-  border-color: oklch(0.3036 0.1223 288);
+  border-color: rgba(17,24,39,0.08);
 }
 
 .admin-text {
-  color: oklch(0.22 0.04 260);
+  color: var(--foreground);
 }
 
 .admin-link {
-  color: oklch(0.5638 0.2255 24.24);
+  color: var(--primary);
 }
 
 .admin-link:hover {
-  color: oklch(0.50 0.2255 24.24);
+  color: var(--secondary);
 }
 
 .admin-input {
-  border-color: oklch(0.3036 0.1223 288);
+  border-color: rgba(17,24,39,0.08);
 }
 
 .admin-input:focus {
-  border-color: oklch(0.5638 0.2255 24.24);
+  border-color: var(--primary);
   outline: none;
   ring: 2px;
-  ring-color: oklch(0.5638 0.2255 24.24);
+  ring-color: var(--primary);
 }
 
 .admin-header-link {
-  color: oklch(0.5638 0.2255 24.24);
-  background-color: oklch(0.5638 0.2255 24.24 / 0.1);
+  color: var(--primary);
+  background-color: rgba(220,20,60,0.08);
 }
 
 .admin-header-link:hover {
-  background-color: oklch(0.5638 0.2255 24.24 / 0.2);
+  background-color: rgba(220,20,60,0.12);
 }
 

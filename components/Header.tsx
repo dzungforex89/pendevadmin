@@ -23,19 +23,19 @@ export default function Header() {
         maxWidth: '1280px',
         width: 'calc(100% - 2rem)',
         borderRadius: '16px',
-        borderColor: 'oklch(0.3036 0.1223 288)',
+        borderColor: 'rgba(17,24,39,0.06)',
         borderWidth: '1px',
-        backgroundColor: isScrolled ? 'oklch(0.99 0.01 260)' : 'oklch(0.98 0.01 260)',
+        backgroundColor: 'rgba(255,255,255,0.95)',
         backdropFilter: 'blur(10px)',
       }}
     >
       <nav className="flex items-center justify-between px-6 py-4">
-        <Link 
+          <Link 
           href="/" 
           className="text-2xl font-bold transition-all duration-200 cursor-pointer hover:opacity-80"
-          style={{ color: 'oklch(0.5638 0.2255 24.24)' }}
+          style={{ color: 'var(--primary)' }}
         >
-          10SAT Console
+          PenDev Console
         </Link>
         
         <div className="flex items-center gap-2">
@@ -43,7 +43,7 @@ export default function Header() {
             href="/" 
             className="px-4 py-2 rounded-lg font-medium text-base transition-all duration-200 cursor-pointer hover:bg-opacity-80"
             style={{ 
-              color: 'oklch(0.22 0.04 260)',
+              color: 'var(--foreground)',
             }}
             onMouseEnter={(e) => {
               e.currentTarget.style.backgroundColor = 'oklch(0.95 0.01 260)';
@@ -60,14 +60,14 @@ export default function Header() {
             href="/admin" 
             className="px-4 py-2 rounded-lg font-medium text-base transition-all duration-200 cursor-pointer"
             style={{ 
-              color: 'oklch(0.5638 0.2255 24.24)',
-              backgroundColor: 'oklch(0.5638 0.2255 24.24 / 0.1)'
+              color: 'var(--primary)',
+              backgroundColor: 'rgba(220,20,60,0.08)'
             }}
             onMouseEnter={(e) => {
-              e.currentTarget.style.backgroundColor = 'oklch(0.5638 0.2255 24.24 / 0.15)';
+              e.currentTarget.style.backgroundColor = 'rgba(220,20,60,0.12)';
             }}
             onMouseLeave={(e) => {
-              e.currentTarget.style.backgroundColor = 'oklch(0.5638 0.2255 24.24 / 0.1)';
+              e.currentTarget.style.backgroundColor = 'rgba(220,20,60,0.08)';
             }}
           >
             Admin
