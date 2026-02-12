@@ -58,9 +58,9 @@ export default function LoginPage() {
 
   if (checking) {
     return (
-      <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: 'oklch(0.98 0.01 260)' }}>
+      <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: 'white' }}>
         <div className="text-center">
-          <svg className="animate-spin h-8 w-8 mx-auto mb-4" style={{ color: 'oklch(0.5 0.2 240)' }} xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+          <svg className="animate-spin h-8 w-8 mx-auto mb-4 text-[var(--primary)]" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
             <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
             <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
           </svg>
@@ -71,37 +71,17 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center relative overflow-hidden" style={{ backgroundColor: 'oklch(0.98 0.01 260)' }}>
-      {/* Background Pattern */}
-      <div 
-        className="absolute inset-0 opacity-[0.03]"
-        style={{
-          backgroundImage: `repeating-linear-gradient(
-            0deg,
-            transparent,
-            transparent 60px,
-            oklch(0.5 0.15 24) 60px,
-            oklch(0.5 0.15 24) 61px
-          ),
-          repeating-linear-gradient(
-            90deg,
-            transparent,
-            transparent 60px,
-            oklch(0.5 0.15 24) 60px,
-            oklch(0.5 0.15 24) 61px
-          )`
-        }}
-      />
+    <div className="min-h-screen flex items-center justify-center relative overflow-hidden" style={{ backgroundColor: 'white' }}>
 
       {/* Login Card */}
       <div className="relative z-10 w-full max-w-md px-6">
         <div className="bg-white rounded-2xl shadow-xl p-8">
           {/* Logo */}
           <div className="text-center mb-6">
-            <h1 className="text-3xl font-bold mb-2" style={{ color: 'oklch(0.45 0.2 24)' }}>
-              Admin Blog
+            <h1 className="text-3xl font-bold mb-2" style={{ color: 'var(--primary)' }}>
+              PenDev Console
             </h1>
-            <p className="text-lg font-semibold mb-1" style={{ color: 'oklch(0.5 0.2 240)' }}>
+            <p className="text-lg font-semibold mb-1" style={{ color: 'rgba(17,24,39,0.8)' }}>
               Chào mừng trở lại!
             </p>
             <p className="text-sm text-gray-600">
@@ -136,8 +116,7 @@ export default function LoginPage() {
                   onChange={(e) => setUsername(e.target.value)}
                   placeholder="Tên đăng nhập"
                   required
-                  className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
-                  style={{ backgroundColor: 'oklch(0.99 0 0)' }}
+                  className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[var(--primary)] focus:border-transparent outline-none transition-all bg-white"
                 />
               </div>
             </div>
@@ -160,8 +139,7 @@ export default function LoginPage() {
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="Mật khẩu"
                   required
-                  className="w-full pl-10 pr-12 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
-                  style={{ backgroundColor: 'oklch(0.99 0 0)' }}
+                  className="w-full pl-10 pr-12 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[var(--primary)] focus:border-transparent outline-none transition-all bg-white"
                 />
                 <button
                   type="button"
@@ -187,18 +165,12 @@ export default function LoginPage() {
               type="submit"
               disabled={loading}
               className="w-full py-3 px-6 rounded-lg font-semibold text-white transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-              style={{ 
-                backgroundColor: 'oklch(0.5 0.2 240)',
-              }}
+              style={{ backgroundColor: 'var(--primary)' }}
               onMouseEnter={(e) => {
-                if (!loading) {
-                  e.currentTarget.style.backgroundColor = 'oklch(0.45 0.2 240)';
-                }
+                if (!loading) e.currentTarget.style.backgroundColor = 'rgba(220,20,60,0.9)';
               }}
               onMouseLeave={(e) => {
-                if (!loading) {
-                  e.currentTarget.style.backgroundColor = 'oklch(0.5 0.2 240)';
-                }
+                if (!loading) e.currentTarget.style.backgroundColor = 'var(--primary)';
               }}
             >
               {loading ? (
